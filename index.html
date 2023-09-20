@@ -34,8 +34,8 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-4">
-                                            <input type="text" class="form-control" id="recipeName" placeholder="Meal Name" required>
-                                            <input type="text" class="form-control" id="region" placeholder="Region" required>
+                                            <input type="text" class="form-control" id="mealName" name="name" placeholder="Meal Name" required>
+                                            <input type="text" class="form-control" id="region" name="region" placeholder="Region" required>
                                             <select name="course" id="course" class="form-select" required>
                                                 <option value="" disabled selected>Course</option>
                                                 <option value="starter">Starter</option>
@@ -56,32 +56,13 @@
                                             <h4>Add new ingredient</h4>
                                         </div>
                                         <div class="col-auto">
-                                            <button type="button" class="btn btn-primary">Add Ingredient</button>
+                                            <button type="button" class="btn btn-primary" onclick="addNewIngredient()">Add Another Ingredient</button>
                                         </div>
                                     </div>
-                                    <div id="ingredients">
-                                        <div class="row">
-                                            <div class="col-4">
-                                                <input type="text" class="form-control" id="ingr_name" placeholder="Ingredient Name" required>
-                                            </div>
-                                            <div class="col-4">
-                                                <input type="text" class="form-control" id="quantity" placeholder="Quantity">
-                                            </div>
-                                            <div class="col-4">
-                                                <select name="unit" id="unit" class="form-select">
-                                                    <option value="" disabled selected>Unit</option>
-                                                    <option value="grams">Grams (g)</option>
-                                                    <option value="kilograms">Millilitres (ml)</option> 
-                                                    <option value="Teaspoon">Teaspoon (tsp)</option>
-                                                    <option value="Tablespoon">Tablespoon (tbsp)</option>
-                                                    <option value="Cups">Cups</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <div id="ingredients"></div>
                                     <hr>
                                     <div>
-                                        <button type="button" class="btn btn-primary">Save Recipe</button>
+                                        <button type="button" class="btn btn-primary" onclick="saveMeal()">Save Meal</button>
                                     </div>
                                 </div>
                             </form>
@@ -101,6 +82,7 @@
         <script>
             $(document).ready(() => {
                 addServingOptions(12);
+                addNewIngredient();
             });
         </script>
     </body>
