@@ -17,4 +17,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     echo $updatedData;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (file_exists('recipes.json')) {
+        $currentMeals = file_get_contents('recipes.json');
+        echo $currentMeals;
+    }
+    else {
+        echo 'shit';
+    }
+}
+
 ?>
