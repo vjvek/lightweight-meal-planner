@@ -26,8 +26,16 @@
             <!-- Create a Meal -->
             <div class="tab-content">
                 <div id="createMeal" class="container tab-pane active"><br>
-                    <h3>Create a Meal</h3>
-                    <p>Create a meal or edit an existing one.</p>
+                    <div class="row">
+                        <div class="col-4">
+                            <h3>Create a Meal</h3>
+                            <p>Create a meal or edit an existing one using the dropdown list below.</p>
+                            <select name="editMeals" id="editMeals" class="form-select" onchange="editMeal()">
+                                <option value="" disabled selected>Edit a Meal</option>
+                            </select>
+                        </div>
+                    </div>
+                    <hr>
                     <div class="row">
                         <div class="col">
                             <form id="createMealForm">
@@ -54,12 +62,10 @@
                                     <hr>
                                     <div class="row d-flex align-items-center">
                                         <div class="col-auto">
-                                            <h4>Add new ingredient</h4>
+                                            <h4>Add the ingredients</h4>
                                         </div>
                                         <div class="col-auto">
-                                            <button type="button" class="btn btn-primary" onclick="addNewIngredient()">Add Another Ingredient</button>
-                                        </div>
-                                        <div class="col-auto">
+                                            <button type="button" class="btn btn-primary" onclick="addNewIngredient(1)">Add Another Ingredient</button>
                                             <button type="button" class="btn btn-danger" onclick="deleteIngredient()">Delete Selected</button>
                                         </div>
                                     </div>
@@ -67,6 +73,7 @@
                                     <hr>
                                     <div>
                                         <button type="button" class="btn btn-primary" onclick="saveMeal()">Save Meal</button>
+                                        <button type="button" class="btn btn-warning" onclick="resetForm()">Reset Form</button>
                                     </div>
                                 </div>
                             </form>
@@ -91,8 +98,8 @@
         <script>
             $(document).ready(() => {
                 addServingOptions(12);
-                addNewIngredient();
-                buildTable();
+                addNewIngredient(1);
+                updateApp();
             });
         </script>
     </body>
