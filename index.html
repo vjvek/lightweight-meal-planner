@@ -27,9 +27,9 @@
             <div class="tab-content">
                 <div id="createMeal" class="container tab-pane active"><br>
                     <div class="row">
+                        <h3>Create a Meal</h3>
+                        <p>Create a meal or edit an existing one using the dropdown list below.</p>
                         <div class="col-4">
-                            <h3>Create a Meal</h3>
-                            <p>Create a meal or edit an existing one using the dropdown list below.</p>
                             <select name="editMeals" id="editMeals" class="form-select" onchange="editMeal()">
                                 <option value="" disabled selected>Edit a Meal</option>
                             </select>
@@ -42,6 +42,7 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-4">
+                                            <input type="hidden" id="mealId" name="mealId">
                                             <input type="text" class="form-control" id="mealName" name="name" placeholder="Meal Name" required>
                                             <input type="text" class="form-control" id="region" name="region" placeholder="Region" required>
                                             <select name="course" id="course" class="form-select" required>
@@ -71,8 +72,8 @@
                                     </div>
                                     <div id="ingredients"></div>
                                     <hr>
-                                    <div>
-                                        <button type="button" class="btn btn-primary" onclick="saveMeal()">Save Meal</button>
+                                    <div id="formBtns">
+                                        <button type="button" id="saveBtn" class="btn btn-primary" onclick="saveMeal()">Save Meal</button>
                                         <button type="button" class="btn btn-warning" onclick="resetForm()">Reset Form</button>
                                     </div>
                                 </div>
@@ -89,6 +90,9 @@
                     <h3>View Meals</h3>
                     <div class="row">
                         <div id="mealsView" class="col"></div>
+                    </div>
+                    <div class="row">
+                        <div id="mealDetail" class="col"></div>
                     </div>
                 </div>
             </div>

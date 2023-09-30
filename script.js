@@ -1,4 +1,4 @@
-var latestId = 0;
+var latestId = 1;
 
 function addServingOptions(servingSize) {    
     var options = '';
@@ -54,18 +54,55 @@ function deleteIngredient() {
 }
 
 
-function saveMeal() {
+function getMeals(type, id) {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            type: "GET",
+            url: "submit.php",
+            datatype: 'json',
+            data: {'type': type, 'id': id},
+            success: (resp, text, xhr) => {
+                // console.log('getMeal', type, resp);
+                resolve(JSON.parse(resp));
+            },
+            error: (xhr, text, err) => {
+                reject(err);
+            }
+        });
+    });
+}
+
+
+function postMeal(meal, mode) {
+    $.ajax({
+        type: "POST",
+        url: "submit.php",
+        datatype: 'json',
+        data: {
+            'payload': JSON.stringify(meal),
+            'mode': mode
+        },
+        success: (resp, text, xhr) => {
+            const meals = JSON.parse(resp);
+            updateMaxId(meals);
+            updateApp();
+            resetForm();
+        }
+    });
+}
+
+
+function mealToJson() {
     const formData = $('#createMealForm');
-    var id = latestId + 1;
-    var meal = {};
-    meal[id] = {
+    const id = $('#mealId').val();
+    const meal = {};
+    const jsonMeal = {
         "name": formData.find('#mealName').val(),
         "region": formData.find('#region').val(),
         "course": formData.find('#course').val(),
         "serving": formData.find('#serving').val(),
         "description": formData.find('#description').val(),
-    };    
-
+    };
     const $ingrRows = formData.find('#ingredients .row');
     // create the ingredients
     var ingredients = [];
@@ -82,55 +119,42 @@ function saveMeal() {
         };
         ingredients.push(ingredient);
     });
+    jsonMeal["ingredients"] = ingredients;
+    meal[id] = jsonMeal;
 
-    meal[id]["ingredients"] = ingredients;
-    console.log(meal);
-    $.ajax({
-        type: "POST",
-        url: "submit.php",
-        datatype: 'json',
-        data: {payload: JSON.stringify(meal)},
-        success: (resp, text, xhr) => {
-            const newRow = `
-                <tr>
-                    <td>${meal['id']}</td>
-                    <td>${meal['name']}</td>
-                    <td>${meal['region']}</td>
-                </tr>`;
-            $('#mealTable tbody').append(newRow);
-            updateMaxId(meal);
-            updateApp();
-            resetForm();
-        }
-    });
+    return meal;
 }
 
 
-function getMeals(type, id) {
-    return new Promise((resolve, reject) => {
-        $.ajax({
-            type: "GET",
-            url: "submit.php",
-            datatype: 'json',
-            data: {'type': type, 'id': id},
-            success: (resp, text, xhr) => {
-                resolve(JSON.parse(resp));
-            },
-            error: (xhr, text, err) => {
-                reject(err);
-            }
-        });
-    });
+function saveMeal() {
+    const meal = mealToJson();
+    postMeal(meal, 'create');
+}
+
+
+function updateMeal() {
+    const meal = mealToJson();
+    postMeal(meal, 'update');
 }
 
 
 function updateMaxId(meals) {
     if (meals) {
         // get an array of the ids
-        const ids = Object.keys(meals);
+        var ids = [];
+        meals.forEach(meal => {
+            for (const id in meal) {
+                ids.push(id);
+            }
+        });
         // convert the ids to ints and get the max
-        const maxId = Math.max(...ids.map(Number));
-        latestId = maxId;
+        const maxId = Math.max(...ids);
+        latestId = maxId + 1;
+        console.log('latest id', latestId)
+        $('#mealId').val(latestId);
+    }
+    else {
+        $('#mealId').val(1);
     }
 }
 
@@ -148,7 +172,7 @@ function updateApp() {
 function updateTable(data) {
     $('#mealsView').empty();
     var html = `
-        <table id="mealTable" class="table">
+        <table id="mealTable" class="table table-hover">
             <thead>
                 <tr>
                     <th scope="col">#</th>
@@ -158,12 +182,11 @@ function updateTable(data) {
             </thead>
             <tbody>`;
     const meals = data;
-    console.log(meals);
     if (meals) {    
         meals.forEach(meal => {
             const id = Object.keys(meal)[0];
             const tableRow = `
-                <tr>
+                <tr onclick=showDetails()>
                     <td>${id}</td>
                     <td>${meal[id]['name']}</td>
                     <td>${meal[id]['region']}</td>
@@ -194,7 +217,7 @@ function editMeal() {
     getMeals('a_meal', id)
         .then((resp) => {
             const meal = resp[id];
-            console.log(meal)
+            $('#mealId').val(id);
             $('#mealName').val(meal['name']);
             $('#region').val(meal['region']);
             $('#course').val(meal['course']);
@@ -213,6 +236,8 @@ function editMeal() {
                 $row.find('input[name=quantity]').val(ingr['quantity']);
                 $row.find('select[name=unit]').val(ingr['unit']);
             });
+            const updateBtn = '<button type="button" id="updateBtn"class="btn btn-primary" onclick="updateMeal()">Update Meal</button>';
+            $('#saveBtn').replaceWith(updateBtn);
         });
 }
 
@@ -222,4 +247,10 @@ function resetForm() {
     $('#ingredients').empty();
     addNewIngredient(1);
     $('#editMeals').val($('#editMeals option:first').val());
+    const saveBtn = '<button type="button" id="saveBtn" class="btn btn-primary" onclick="saveMeal()">Save Meal</button>';
+    $('#updateBtn').replaceWith(saveBtn);
+    getMeals('all_meals')
+        .then(resp =>{
+            updateMaxId(resp);
+        });
 }
