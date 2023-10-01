@@ -8,39 +8,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         file_put_contents('recipes.json', '');
     }
     
+    $currentMeals = file_get_contents('recipes.json'); // read the current meals
+    $currentMealsArray = json_decode($currentMeals, true);
+
     if ($mode === 'create') {
-        $currentMeals = file_get_contents('recipes.json'); // read the current meals
-        $currentMealsArray = json_decode($currentMeals, true);
-
         $currentMealsArray[] = $meal; // combine the new meal with the existing ones
-        $updatedData = json_encode($currentMealsArray);
-        file_put_contents('recipes.json', $updatedData);
-
-        echo $updatedData;
     }
-    if ($mode === 'update') {
-        $currentMeals = file_get_contents('recipes.json'); // read the current meals
-        $currentMealsArray = json_decode($currentMeals, true);
-        
-        $mealId = array_key_first($meal);
+    else {
+        $mealId = array_key_first($meal);   // get the id of the meal
         foreach ($currentMealsArray as $index=>$currentMeal) {
-            $id = array_keys($currentMeal)[0];
+            $id = array_keys($currentMeal)[0];  // get the id of each meal
+            
             if ($id == $mealId) {
-                $currentMealsArray[$index] = $meal;
+                if ($mode === 'update') {
+                    // replace the existing meal with the updated one
+                    $currentMealsArray[$index] = $meal; 
+                }
+                else if ($mode === 'delete') {
+                    // delete the meal
+                    unset($currentMealsArray[$index]);
+                }
             }
         }
-        $updatedMeals = json_encode($currentMealsArray);
-        file_put_contents('recipes.json', $updatedMeals);
-
-        echo $updatedMeals;
     }
+
+    $updatedMeals = json_encode($currentMealsArray);
+    file_put_contents('recipes.json', $updatedMeals);
+
+    echo $updatedMeals;
 }
-
-
-function filterByID($meal, $id) {
-    return array_key_exists($id, $meal);
-}
-
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $type = $_GET['type'];

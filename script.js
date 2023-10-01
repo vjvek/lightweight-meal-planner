@@ -138,9 +138,15 @@ function updateMeal() {
 }
 
 
+function deleteMeal() {
+    const meal = mealToJson();
+    postMeal(meal, 'delete');
+}
+
 function updateMaxId(meals) {
     if (meals) {
         // get an array of the ids
+        console.log(meals)
         var ids = [];
         meals.forEach(meal => {
             for (const id in meal) {
@@ -186,7 +192,7 @@ function updateTable(data) {
         meals.forEach(meal => {
             const id = Object.keys(meal)[0];
             const tableRow = `
-                <tr onclick=showDetails()>
+                <tr onclick=showDetails(this)>
                     <td>${id}</td>
                     <td>${meal[id]['name']}</td>
                     <td>${meal[id]['region']}</td>
@@ -236,8 +242,12 @@ function editMeal() {
                 $row.find('input[name=quantity]').val(ingr['quantity']);
                 $row.find('select[name=unit]').val(ingr['unit']);
             });
-            const updateBtn = '<button type="button" id="updateBtn"class="btn btn-primary" onclick="updateMeal()">Update Meal</button>';
-            $('#saveBtn').replaceWith(updateBtn);
+            const updateBtns = `
+                <button type="button" id="updateBtn"class="btn btn-primary" onclick="updateMeal()">Update Meal</button>
+                <button type="button" id="deleteBtn"class="btn btn-danger" onclick="deleteMeal()">Delete Meal</button>
+            `;
+            
+            $('#saveBtn').replaceWith(updateBtns);
         });
 }
 
@@ -248,9 +258,38 @@ function resetForm() {
     addNewIngredient(1);
     $('#editMeals').val($('#editMeals option:first').val());
     const saveBtn = '<button type="button" id="saveBtn" class="btn btn-primary" onclick="saveMeal()">Save Meal</button>';
-    $('#updateBtn').replaceWith(saveBtn);
+    $('#updateBtn, #deleteBtn').remove();
+    
+    if (!$('#saveBtn').length) {
+        $('#formBtns').prepend(saveBtn);
+    }
+    
     getMeals('all_meals')
         .then(resp =>{
             updateMaxId(resp);
         });
+}
+
+
+function showDetails(row) {
+    const $row = $(row);
+    const id = $row.find('td').first().text();
+    getMeals('a_meal', id)
+        .then(resp => {
+            html = buildMealHtml(resp[id]);
+            $('#mealDetail').html(html);
+        });
+}
+
+
+function buildMealHtml(meal) {
+    var html = '';
+    
+    const header = `<h3>${meal['name']}</h3>`
+    const recipe = `<p id="detailDescription">${meal['description']}</p>`
+    
+    
+    html += header + recipe;
+
+    return html;
 }
