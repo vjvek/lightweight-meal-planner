@@ -50,6 +50,7 @@
                                                 <option value="starter">Starter</option>
                                                 <option value="main">Main</option>
                                                 <option value="dessert">Dessert</option>
+                                                <option value="condiment">Condiment</option>
                                                 <option value="other">Other</option>
                                             </select>
                                             <select name="serving" id="serving" class="form-select" required>
@@ -92,7 +93,17 @@
                         <div id="mealsView" class="col"></div>
                     </div>
                     <div class="row">
-                        <div id="mealDetail" class="col"></div>
+                        <div class="col">
+                            <div class="row">
+                                <div id="detailHeading" class="col d-flex justify-content-between"></div>
+                            </div>
+                            <div class="row">
+                                <div id="detailIngredients" class="col"></div>
+                            </div>
+                            <div class="row">
+                                <div id="detailDescription" class="col"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

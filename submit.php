@@ -1,5 +1,22 @@
 <?php
 
+function makeIdUnique($mealArray, $meal) {
+    $ids = [];
+    // get all the keys
+    foreach ($mealArray as $index=>$val) {
+        $id = array_keys($mealArray[$index])[0];
+        array_push($ids, $id);
+    }
+    $maxId = max($ids);
+    $mealId = array_keys($meal)[0];   
+    // if the meal id matches the current max id add 1 to it
+    if ($maxId == $mealId) {
+        $meal = array($mealId+1=>$meal[$mealId]);
+    }  
+    return $meal;
+}
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $meal = json_decode($_POST['payload'], true);
     $mode = $_POST['mode'];
@@ -12,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $currentMealsArray = json_decode($currentMeals, true);
 
     if ($mode === 'create') {
+        $meal = makeIdUnique($currentMealsArray, $meal);
         $currentMealsArray[] = $meal; // combine the new meal with the existing ones
     }
     else {

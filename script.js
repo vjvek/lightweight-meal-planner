@@ -146,7 +146,6 @@ function deleteMeal() {
 function updateMaxId(meals) {
     if (meals) {
         // get an array of the ids
-        console.log(meals)
         var ids = [];
         meals.forEach(meal => {
             for (const id in meal) {
@@ -276,20 +275,30 @@ function showDetails(row) {
     const id = $row.find('td').first().text();
     getMeals('a_meal', id)
         .then(resp => {
-            html = buildMealHtml(resp[id]);
-            $('#mealDetail').html(html);
+            buildMealHtml(resp[id]);
         });
 }
 
 
 function buildMealHtml(meal) {
-    var html = '';
     
-    const header = `<h3>${meal['name']}</h3>`
-    const recipe = `<p id="detailDescription">${meal['description']}</p>`
+    const header = `<h3>${meal['name']}</h3>`;
     
     
-    html += header + recipe;
+    
+    
+    const recipe = `<h5>Instructions</h5><p>${meal['description']}</p>`;
+    var ingredients = `
+        <h5>Ingredients</h5>
+        <ul>
+    `;
+    
+    meal['ingredients'].forEach(ingr => {
+        ingredients += `<li>${ingr['name']} <strong><span>${ingr['quantity']}</span> (${ingr['unit']})</strong></li>`;
+    });
 
-    return html;
+    ingredients += '</ul>';
+    $('#detailHeading').html(header);
+    $('#detailIngredients').html(ingredients);
+    $('#detailDescription').html(recipe);
 }
