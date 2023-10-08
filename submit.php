@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $currentMealsArray[] = $meal; // combine the new meal with the existing ones
     }
     else {
-        $mealId = array_key_first($meal);   // get the id of the meal
+        $mealId = array_key_first($meal);   // get the id of the POST meal
         foreach ($currentMealsArray as $index=>$currentMeal) {
             $id = array_keys($currentMeal)[0];  // get the id of each meal
             
@@ -82,6 +82,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             echo json_encode($meal);
         }
     }
+
+    if ($type === 'ingredients') {
+        if (file_exists('ingredients.json') and filesize('ingredients.json') != 0) {
+            $ingredients = file_get_contents('ingredients.json');
+            echo $ingredients;
+        }
+    }
+
     else {
         echo false;
     }

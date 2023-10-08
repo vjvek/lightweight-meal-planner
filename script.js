@@ -1,47 +1,66 @@
 var latestId = 1;
 
-function addServingOptions(servingSize) {    
-    var options = '';
-    for (let i = 1; i <= servingSize; i++) {
-        options += `<option value="${i}">${i}</option>`;    
-    }
-    options += '<option value="N/A">N/A</option>';
-    $('#serving').append(options);
+
+function getIngredients() {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            type: "GET",
+            url: "submit.php",
+            datatype: 'json',
+            data: {'type': 'ingredients'},
+            success: (resp, text, xhr) => {
+                resolve(JSON.parse(resp));
+            },
+            error: (xhr, text, err) => {
+                reject(err);
+            }
+        });
+    });
 }
 
-var counter = 1
 function addNewIngredient(num) {
-    ingredients = '';
-    // if the ingre has contents check the id of the last row
-    // else 1
-    for (let i = 1; i <= num; i++) {
-        const html = `
-            <div class="row">
-                <div class="col-auto d-flex align-items-center form-check">
-                    <input class="form-check-input" type="checkbox" title="Delete this ingredient">
-                </div>
-                <div class="col-4">
-                    <input type="text" class="form-control" name="ingredient" placeholder="Ingredient Name" required>
-                </div>
-                <div class="col-3">
-                    <input type="text" class="form-control" name="quantity" placeholder="Quantity">
-                </div>
-                <div class="col-4">
-                    <select name="unit" class="form-select">
-                        <option value="" disabled selected>Unit</option>
-                        <option value="g">Grams (g)</option>
-                        <option value="ml">Millilitres (ml)</option> 
-                        <option value="tsp">Teaspoon (tsp)</option>
-                        <option value="tbsp">Tablespoon (tbsp)</option>
-                        <option value="cups">Cups</option>
-                        <option value="whole">Whole</option>
-                    </select>
-                </div>
-            </div>`;
-        ingredients += html;
-        counter++;
-    }
-    $('#ingredients').append(ingredients);
+    var ingredients = '';
+    getIngredients()
+        .then((resp) => {
+            const ingredientList = resp;
+            var ingrSelect = `
+                <select name="ingredient" class="form-select" required>
+                <option value="" disabled selected>Ingredient</option>
+            `;
+            ingredientList.forEach(ingr => {
+                const option = `<option value="${ingr}">${ingr}</option>`;
+                ingrSelect += option;
+            });
+            ingrSelect += '</select>';
+
+        for (let i = 1; i <= num; i++) {
+            const html = `
+                <div id="ingrRow-${i}" class="row">
+                    <div class="col-auto d-flex align-items-center form-check">
+                        <input class="form-check-input" type="checkbox" title="Delete this ingredient">
+                    </div>
+                    <div class="col-4">
+                        ${ingrSelect}
+                    </div>
+                    <div class="col-3">
+                        <input type="number" class="form-control" name="quantity" min="0" placeholder="Quantity">
+                    </div>
+                    <div class="col-4">
+                        <select name="unit" class="form-select">
+                            <option value="" disabled selected>Unit</option>
+                            <option value="g">Grams (g)</option>
+                            <option value="ml">Millilitres (ml)</option> 
+                            <option value="tsp">Teaspoon (tsp)</option>
+                            <option value="tbsp">Tablespoon (tbsp)</option>
+                            <option value="cups">Cups</option>
+                            <option value="whole">Whole</option>
+                        </select>
+                    </div>
+                </div>`;
+            ingredients += html;
+        }
+        $('#ingredients').append(ingredients);
+    });
 }
 
 
@@ -108,7 +127,7 @@ function mealToJson() {
     var ingredients = [];
     $ingrRows.each(function() {
         const $ingr = $(this);
-        const $name = $ingr.find('input[name=ingredient]');
+        const $name = $ingr.find('select[name=ingredient]');
         const $quantity = $ingr.find('input[name=quantity]');
         const $unit = $ingr.find('select[name=unit]');
 
@@ -155,7 +174,6 @@ function updateMaxId(meals) {
         // convert the ids to ints and get the max
         const maxId = Math.max(...ids);
         latestId = maxId + 1;
-        console.log('latest id', latestId)
         $('#mealId').val(latestId);
     }
     else {
@@ -170,7 +188,18 @@ function updateApp() {
         updateMaxId(resp);
         updateTable(resp);
         updateMealList(resp);
+
     });
+}
+
+
+function prettyBool(val) {
+    if (val) {
+        return '✔️';
+    }
+    else {
+        return '❌';
+    }
 }
 
 
@@ -183,6 +212,8 @@ function updateTable(data) {
                     <th scope="col">#</th>
                     <th scope="col">Name</th>
                     <th scope="col">Region</th>
+                    <th scope="col" class="text-center">Description</th>
+                    <th scope="col" class="text-center">Ingredients</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -195,6 +226,8 @@ function updateTable(data) {
                     <td>${id}</td>
                     <td>${meal[id]['name']}</td>
                     <td>${meal[id]['region']}</td>
+                    <td class="text-center">${prettyBool(meal[id]['description'])}</td>
+                    <td class="text-center">${prettyBool(meal[id]['ingredients'][0]['name'])}</td>
                 </tr>`;
             html += tableRow;
         });
@@ -216,6 +249,27 @@ function updateMealList(data) {
 }
 
 
+function waitForElm(selector) {
+    return new Promise(resolve => {
+        if (document.querySelector(selector)) {
+            return resolve(document.querySelector(selector));
+        }
+        // disconnect when the observer detects the element
+        const observer = new MutationObserver(mutations => {
+            if (document.querySelector(selector)) {
+                observer.disconnect();
+                resolve(document.querySelector(selector));
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,    // check for addition or removal of child nodes
+            subtree: true       // observe all descendants
+        });
+    });
+}
+
+
 function editMeal() {
     // gets a meal and populates the form with the data so that it can be edited
     const id = $('#editMeals option:selected').val();
@@ -233,14 +287,16 @@ function editMeal() {
             ingr_count = meal['ingredients'].length;
             $('#ingredients').empty();
             addNewIngredient(ingr_count);
-
-            const $ingrRows = $('#createMealForm').find('#ingredients .row');
+            
             meal['ingredients'].forEach((ingr, index) => {
-                $row = $ingrRows.eq(index);
-                $row.find('input[name=ingredient]').val(ingr['name']);
-                $row.find('input[name=quantity]').val(ingr['quantity']);
-                $row.find('select[name=unit]').val(ingr['unit']);
+                // wait for the element to exist before setting the values
+                waitForElm(`#ingrRow-${index+1}`).then((elem) => {
+                    $(elem).find('select[name=ingredient]').val(ingr['name']);
+                    $(elem).find('input[name=quantity]').val(ingr['quantity']);
+                    $(elem).find('select[name=unit]').val(ingr['unit']);
+                });
             });
+
             const updateBtns = `
                 <button type="button" id="updateBtn"class="btn btn-primary" onclick="updateMeal()">Update Meal</button>
                 <button type="button" id="deleteBtn"class="btn btn-danger" onclick="deleteMeal()">Delete Meal</button>
@@ -281,24 +337,34 @@ function showDetails(row) {
 
 
 function buildMealHtml(meal) {
-    
-    const header = `<h3>${meal['name']}</h3>`;
-    
-    
-    
-    
-    const recipe = `<h5>Instructions</h5><p>${meal['description']}</p>`;
-    var ingredients = `
-        <h5>Ingredients</h5>
-        <ul>
-    `;
-    
-    meal['ingredients'].forEach(ingr => {
-        ingredients += `<li>${ingr['name']} <strong><span>${ingr['quantity']}</span> (${ingr['unit']})</strong></li>`;
-    });
 
+    const header = `<h3>${meal['name']}</h3>`;    
+    // build the ingredients
+    var ingredients = '<h5>Ingredients</h5>';
+
+    if (meal['ingredients'][0]['name']) {
+        meal['ingredients'].forEach((ingr, index) => {
+            if (index === 0) {
+                ingredients += '<ul>';
+            }
+            ingredients += `<li>${ingr['name']} <strong><span>${ingr['quantity']}</span> (${ingr['unit']})</strong></li>`;
+        });
+    }
+    else {
+        ingredients += "<p>This meal doesn't have any ingredients so go add some MUPPET<p>";
+    }
     ingredients += '</ul>';
+    // build the description
+    if (meal['description']) {
+        var description = meal['description']
+    }
+    else {
+        var description = "This meal doesn't have a description so go add one MUPPET";
+    }
+
+    const instructions = `<h5>Instructions</h5><p>${description}</p>`;    
+
     $('#detailHeading').html(header);
     $('#detailIngredients').html(ingredients);
-    $('#detailDescription').html(recipe);
+    $('#detailDescription').html(instructions);
 }

@@ -5,8 +5,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Meal Planner</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="style.css">
         <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     </head>
     <body>
         <div class="container">
@@ -53,9 +55,7 @@
                                                 <option value="condiment">Condiment</option>
                                                 <option value="other">Other</option>
                                             </select>
-                                            <select name="serving" id="serving" class="form-select" required>
-                                                <option value="" disabled selected>Serving Size</option>
-                                            </select>
+                                            <input type="number" class="form-control" id="serving" name="serving" placeholder="servings"></input>
                                         </div>
                                         <div class="col-8">
                                             <textarea name="description" id="description" placeholder="Add a description here eg. the recipe steps"></textarea>
@@ -112,7 +112,7 @@
         <script src="script.js"></script>
         <script>
             $(document).ready(() => {
-                addServingOptions(12);
+                // addServingOptions(12);
                 addNewIngredient(1);
                 updateApp();
             });
