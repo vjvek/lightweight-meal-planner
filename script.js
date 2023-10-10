@@ -18,13 +18,14 @@ function getIngredients() {
     });
 }
 
+
 function addNewIngredient(num) {
     var ingredients = '';
     getIngredients()
         .then((resp) => {
             const ingredientList = resp;
             var ingrSelect = `
-                <select name="ingredient" class="form-select" required>
+                <select class="form-select ingr-select" name="ingredient"required>
                 <option value="" disabled selected>Ingredient</option>
             `;
             ingredientList.forEach(ingr => {
@@ -35,17 +36,17 @@ function addNewIngredient(num) {
 
         for (let i = 1; i <= num; i++) {
             const html = `
-                <div id="ingrRow-${i}" class="row">
-                    <div class="col-auto d-flex align-items-center form-check">
+                <div id="ingrRow-${i}" class="row ps-3">
+                    <div class="col-sm-1 col-md-auto d-flex align-items-center form-check pe-0">
                         <input class="form-check-input" type="checkbox" title="Delete this ingredient">
                     </div>
-                    <div class="col-4">
+                    <div class="col-sm-11 col-md-6 col-lg-3">
                         ${ingrSelect}
                     </div>
-                    <div class="col-3">
+                    <div class="col-sm-12 col-md-3 col-lg-3">
                         <input type="number" class="form-control" name="quantity" min="0" placeholder="Quantity">
                     </div>
-                    <div class="col-4">
+                    <div class="col-sm-12 col-md-3 col-lg-3">
                         <select name="unit" class="form-select">
                             <option value="" disabled selected>Unit</option>
                             <option value="g">Grams (g)</option>
@@ -60,6 +61,10 @@ function addNewIngredient(num) {
             ingredients += html;
         }
         $('#ingredients').append(ingredients);
+        // only applies select2 once the ingredients nodes have been added
+        waitForElm('[id^="ingrRow"]').then( () => {
+            $('.ingr-select').select2();
+        });
     });
 }
 
@@ -188,7 +193,6 @@ function updateApp() {
         updateMaxId(resp);
         updateTable(resp);
         updateMealList(resp);
-
     });
 }
 
@@ -291,7 +295,7 @@ function editMeal() {
             meal['ingredients'].forEach((ingr, index) => {
                 // wait for the element to exist before setting the values
                 waitForElm(`#ingrRow-${index+1}`).then((elem) => {
-                    $(elem).find('select[name=ingredient]').val(ingr['name']);
+                    $(elem).find('select[name=ingredient]').val(ingr['name']).trigger('change');
                     $(elem).find('input[name=quantity]').val(ingr['quantity']);
                     $(elem).find('select[name=unit]').val(ingr['unit']);
                 });

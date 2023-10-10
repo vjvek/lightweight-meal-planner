@@ -25,13 +25,13 @@
                 </li>
             </ul>
             
-            <!-- Create a Meal -->
+            <!-- Create/Edit a Meal -->
             <div class="tab-content">
                 <div id="createMeal" class="container tab-pane active"><br>
                     <div class="row">
                         <h3>Create a Meal</h3>
                         <p>Create a meal or edit an existing one using the dropdown list below.</p>
-                        <div class="col-4">
+                        <div class="col-sm-12 col-md-6 col-lg-4">
                             <select name="editMeals" id="editMeals" class="form-select" onchange="editMeal()">
                                 <option value="" disabled selected>Edit a Meal</option>
                             </select>
@@ -43,7 +43,7 @@
                             <form id="createMealForm">
                                 <div class="form-group">
                                     <div class="row">
-                                        <div class="col-4">
+                                        <div class="col-sm-12 col-md-6 col-lg-4">
                                             <input type="hidden" id="mealId" name="mealId">
                                             <input type="text" class="form-control" id="mealName" name="name" placeholder="Meal Name" required>
                                             <input type="text" class="form-control" id="region" name="region" placeholder="Region" required>
@@ -55,16 +55,16 @@
                                                 <option value="condiment">Condiment</option>
                                                 <option value="other">Other</option>
                                             </select>
-                                            <input type="number" class="form-control" id="serving" name="serving" placeholder="servings"></input>
+                                            <input type="number" class="form-control" id="serving" name="serving" placeholder="Servings"></input>
                                         </div>
-                                        <div class="col-8">
+                                        <div class="col-sm-12 col-md-6 col-lg-8">
                                             <textarea name="description" id="description" placeholder="Add a description here eg. the recipe steps"></textarea>
                                         </div>
                                     </div>
                                     <hr>
-                                    <div class="row d-flex align-items-center">
+                                    <div class="row d-flex justify-content-between">
                                         <div class="col-auto">
-                                            <h4>Add the ingredients</h4>
+                                            <h4>Ingredients</h4>
                                         </div>
                                         <div class="col-auto">
                                             <button type="button" class="btn btn-primary" onclick="addNewIngredient(1)">Add Another Ingredient</button>
@@ -112,7 +112,6 @@
         <script src="script.js"></script>
         <script>
             $(document).ready(() => {
-                // addServingOptions(12);
                 addNewIngredient(1);
                 updateApp();
             });
