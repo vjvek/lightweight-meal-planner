@@ -55,6 +55,8 @@ function addNewIngredient(num) {
                             <option value="tbsp">Tablespoon (tbsp)</option>
                             <option value="cups">Cups</option>
                             <option value="whole">Whole</option>
+                            <option value="sprigs">Sprigs</option>
+                            <option value="Sticks">Sticks</option>
                         </select>
                     </div>
                 </div>`;
@@ -206,38 +208,107 @@ function prettyBool(val) {
     }
 }
 
+// create the Datatable
+var table = $('#mealsTable').DataTable({
+    "autoWidth": true,
+    "columnDefs": [
+        { target: 5, visible: false },
+        { target: 6, visible: false },
+        { target: 7, visible: false }
+    ]}
+);
 
 function updateTable(data) {
-    $('#mealsView').empty();
-    var html = `
-        <table id="mealTable" class="table table-hover">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Region</th>
-                    <th scope="col" class="text-center">Description</th>
-                    <th scope="col" class="text-center">Ingredients</th>
-                </tr>
-            </thead>
-            <tbody>`;
-    const meals = data;
-    if (meals) {    
-        meals.forEach(meal => {
-            const id = Object.keys(meal)[0];
-            const tableRow = `
-                <tr onclick=showDetails(this)>
-                    <td>${id}</td>
-                    <td>${meal[id]['name']}</td>
-                    <td>${meal[id]['region']}</td>
-                    <td class="text-center">${prettyBool(meal[id]['description'])}</td>
-                    <td class="text-center">${prettyBool(meal[id]['ingredients'][0]['name'])}</td>
-                </tr>`;
-            html += tableRow;
-        });
-        html += '</tbody></table>';
-        $('#mealsView').append(html);
-    }
+    table
+        .clear()
+        .draw();
+      
+    var meals = [];
+    
+    data.forEach(meal => {
+        const id = Object.keys(meal)[0];
+        var ingredients = '<h5>Ingredients</h5>';
+        // build the inrgedients
+        if (meal[id]['ingredients'][0]['name']) {
+            meal[id]['ingredients'].forEach((ingr, index) => {
+                if (index === 0) {
+                    ingredients += '<ul>';
+                }
+                ingredients += `
+                    <li class="ingr-shown">${ingr['name']} <strong><span class="meal-view-quantity">${ingr['quantity']}</span> (${ingr['unit']})</strong></li>
+                    <li class="ingr-hidden" hidden>${ingr['name']} <strong><span class="meal-view-quantity">${ingr['quantity']}</span> (${ingr['unit']})</strong></li>
+                `;
+            });
+        }
+        else {
+            ingredients += "<p>This meal doesn't have any ingredients so go add some MUPPET<p>";
+        }
+        ingredients += '</ul>';
+        
+        if (meal[id]['description']) {
+            var description = meal[id]['description']
+        }
+        else {
+            var description = "This meal doesn't have a description so go add one MUPPET";
+        }
+        // build the description
+        const instructions = `<h5>Instructions</h5><p>${description}</p>`;
+
+        mealArray = [
+            id,
+            meal[id]['name'],
+            meal[id]['region'],
+            prettyBool(meal[id]['description']),
+            prettyBool(meal[id]['ingredients'][0]['name']),
+            ingredients,
+            instructions,
+            meal[id]['serving']
+        ]
+        meals.push(mealArray);
+    });
+    
+    table.rows.add(meals).draw();
+    
+    $('#mealsTable').on('click', 'tbody tr', function() {
+        const data = table.row(this).data();
+        const name = data[1];
+        const header = `<h3>${name}</h3><p class="font-small">Original Serving Size (<span id="ogServingSize">${data[7]}</span>)</p>`;
+        const ingredients = data[5];
+        const description = data[6];
+        const serving = data[7];
+        const servingInpt = `
+            <label for="servingInpt" class="form-label">Change Serving Size</label>
+            <input id="servingInpt" type="number" class="form-control" min="0" value="${serving}" placeholder="Serving" onchange="updateIngrQuantity()"></input>
+        `;
+        $('#detailHeading').html(header);
+        $('#servingCalc').html(servingInpt);
+        $('#detailIngredients').html(ingredients);
+        $('#detailDescription').html(description);
+    });
+}
+
+
+function updateIngrQuantity() {
+    const $ingredientsHidden = $('#detailIngredients li.ingr-hidden');
+    const $ingredientsShown = $('#detailIngredients li.ingr-shown');
+    const ogServingSize = parseInt($('#ogServingSize').text());
+    const newServingSize = parseInt($('#servingInpt').val());
+    const percentChange = newServingSize / ogServingSize
+    
+    $ingredientsHidden.each( (index, ingr) => {
+        const $ingr = $(ingr);
+        const $quantityHidden = $ingr.find('.meal-view-quantity');
+        // calculate the new quantity
+        const quantityVal = parseFloat($quantityHidden.text());
+        var newQuantity = Math.round(quantityVal * percentChange * 10) / 10;
+        // get the visible quantity value
+        const $quantityShown = $ingredientsShown.find('.meal-view-quantity').eq(index);
+        // makes the quantity an integer it's a whole number float or larger than 50
+        if (newQuantity % 1 == 0 || newQuantity > 50) {
+            newQuantity = Math.round(newQuantity);
+        }
+        $quantityShown.text(newQuantity);
+    });
 }
 
 
@@ -327,48 +398,4 @@ function resetForm() {
         .then(resp =>{
             updateMaxId(resp);
         });
-}
-
-
-function showDetails(row) {
-    const $row = $(row);
-    const id = $row.find('td').first().text();
-    getMeals('a_meal', id)
-        .then(resp => {
-            buildMealHtml(resp[id]);
-        });
-}
-
-
-function buildMealHtml(meal) {
-
-    const header = `<h3>${meal['name']}</h3>`;    
-    // build the ingredients
-    var ingredients = '<h5>Ingredients</h5>';
-
-    if (meal['ingredients'][0]['name']) {
-        meal['ingredients'].forEach((ingr, index) => {
-            if (index === 0) {
-                ingredients += '<ul>';
-            }
-            ingredients += `<li>${ingr['name']} <strong><span>${ingr['quantity']}</span> (${ingr['unit']})</strong></li>`;
-        });
-    }
-    else {
-        ingredients += "<p>This meal doesn't have any ingredients so go add some MUPPET<p>";
-    }
-    ingredients += '</ul>';
-    // build the description
-    if (meal['description']) {
-        var description = meal['description']
-    }
-    else {
-        var description = "This meal doesn't have a description so go add one MUPPET";
-    }
-
-    const instructions = `<h5>Instructions</h5><p>${description}</p>`;    
-
-    $('#detailHeading').html(header);
-    $('#detailIngredients').html(ingredients);
-    $('#detailDescription').html(instructions);
 }

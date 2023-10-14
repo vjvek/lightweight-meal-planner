@@ -6,6 +6,16 @@ input, select, button {
     margin-bottom: 10px;
 }
 
+@media screen and (max-width: 768px) {
+    input[name="quantity"] {
+        margin-top: 10px;
+    }
+}
+
+.font-small {
+    font-size: 12px;
+}
+
 /* .select2-search {
     background-color: #00f !important;
 } */
@@ -50,6 +60,11 @@ textarea {
     white-space: pre-line;
 }
 
-.text-center {
+#mealsTable {
+    width: 100% !important;
+}
+
+#mealsTable th:nth-child(4), #mealsTable td:nth-child(4),
+#mealsTable th:nth-child(5), #mealsTable td:nth-child(5){
     text-align: center;
 }
