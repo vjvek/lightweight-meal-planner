@@ -65,7 +65,7 @@ function addNewIngredient(num) {
         $('#ingredients').append(ingredients);
         // only applies select2 once the ingredients nodes have been added
         waitForElm('[id^="ingrRow"]').then( () => {
-            $('.ingr-select').select2();
+            $('.ingr-select').select2({ width: '100%' });
         });
     });
 }
@@ -210,13 +210,14 @@ function prettyBool(val) {
 
 // create the Datatable
 var table = $('#mealsTable').DataTable({
-    "autoWidth": true,
-    "columnDefs": [
+    columnDefs: [
+        { target: 0, visible: false },
         { target: 5, visible: false },
         { target: 6, visible: false },
         { target: 7, visible: false }
-    ]}
-);
+    ],
+    order: [[1, 'asc']] // order by name
+});
 
 function updateTable(data) {
     table

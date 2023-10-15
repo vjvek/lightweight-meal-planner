@@ -1,3 +1,7 @@
+body, div.container {
+    background-color: rgb(249, 242, 242);
+}
+
 input, select, button {
     margin-bottom: 10px;
 }
@@ -64,7 +68,7 @@ textarea {
     width: 100% !important;
 }
 
-#mealsTable th:nth-child(4), #mealsTable td:nth-child(4),
-#mealsTable th:nth-child(5), #mealsTable td:nth-child(5){
+#mealsTable th:nth-child(3), #mealsTable td:nth-child(3),
+#mealsTable th:nth-child(4), #mealsTable td:nth-child(4){
     text-align: center;
 }

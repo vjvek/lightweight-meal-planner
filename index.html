@@ -4,19 +4,24 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Meal Planner</title>
+        <link rel="icon" href="static/images/favicon.ico" type="image/x-icon" />
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
-        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="static/css/style.css">
         <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
     </head>
     <body>
         <div class="container">
-            <h1 class="mb-4">Meal Planner</h1>
-            <ul class="nav nav-tabs" role="tablist">
+            <div class="row">
+                <div class="col d-flex justify-content-center pt-4">
+                    <h1 class="mb-4">Meal Planner</h1>
+                </div>
+            </div>
+            <ul class="nav nav-underline justify-content-center" role="tablist">
                 <li class="nav-item">
                     <a class="nav-link active" data-bs-toggle="tab" href="#mealViewer">My Meals</a>
                 </li>
@@ -32,8 +37,9 @@
             </ul>
             <div class="tab-content">
                 <!-- View Meals -->
-                <div id="mealViewer" class="container tab-pane fade"><br>
-                    <h3>View Meals</h3>
+                <div id="mealViewer" class="container tab-pane active"><br>
+                    <h3>My Meals</h3>
+                    <p>All your meals are shown here. You can search across all of them to find what you're looking for. Select one to see full details.</p>
                     <div class="row">
                         <div class="col">
                             <table id="mealsTable" class="table table-hover">
@@ -73,7 +79,7 @@
                     <h3>My Meal Plan</h3>
                 </div>
                 <!-- Create/Edit a Meal -->
-                    <div id="createMeal" class="container tab-pane active"><br>
+                    <div id="createMeal" class="container tab-pane fade"><br>
                         <div class="row">
                             <h3>Create a Meal</h3>
                             <p>Create a meal or edit an existing one using the dropdown list below.</p>
@@ -137,7 +143,7 @@
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
-        <script src="script.js"></script>
+        <script src="static/js/script.js"></script>
         <script>
             $(document).ready(() => {
                 addNewIngredient(1);

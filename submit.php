@@ -16,16 +16,18 @@ function makeIdUnique($mealArray, $meal) {
     return $meal;
 }
 
+$recipes = 'data/recipes.json';
+$ingredients = 'data/ingredients.json';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $meal = json_decode($_POST['payload'], true);
     $mode = $_POST['mode'];
 
-    if (!file_exists('recipes.json')) {
-        file_put_contents('recipes.json', '');
+    if (!file_exists($recipes)) {
+        file_put_contents($recipes, '');
     }
     
-    $currentMeals = file_get_contents('recipes.json'); // read the current meals
+    $currentMeals = file_get_contents($recipes); // read the current meals
     $currentMealsArray = json_decode($currentMeals, true);
 
     if ($mode === 'create') {
@@ -51,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $updatedMeals = json_encode($currentMealsArray);
-    file_put_contents('recipes.json', $updatedMeals);
+    file_put_contents($recipes, $updatedMeals);
 
     echo $updatedMeals;
 }
@@ -59,12 +61,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $type = $_GET['type'];
     // create the json file if it doesn't exist
-    if (!file_exists('recipes.json')) {
-        file_put_contents('recipes.json', '');
+    if (!file_exists($recipes)) {
+        file_put_contents($recipes, '');
     }
     
-    if (file_exists('recipes.json') and filesize('recipes.json') != 0) {
-        $currentMeals = file_get_contents('recipes.json');
+    if (file_exists($recipes) and filesize($recipes) != 0) {
+        $currentMeals = file_get_contents($recipes);
         if ($type === 'all_meals') {
             echo $currentMeals;
         }
@@ -84,8 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     if ($type === 'ingredients') {
-        if (file_exists('ingredients.json') and filesize('ingredients.json') != 0) {
-            $ingredients = file_get_contents('ingredients.json');
+        if (file_exists($ingredients) and filesize($ingredients) != 0) {
+            $ingredients = file_get_contents($ingredients);
             echo $ingredients;
         }
     }
