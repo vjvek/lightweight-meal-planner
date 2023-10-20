@@ -1,5 +1,31 @@
 var latestId = 1;
 
+addNewIngredient(1);
+updateApp();
+$('#editMeals').select2({ width: '100%' });
+// disable most of the inputs in the create a meal section
+var $initInputs = $('#editMeals, #mealName');
+var $otherInputs = $('#createMeal :input:not(#editMeals, #mealName)')
+
+$initInputs.on('change', () => {
+    const editMeal = $('#editMeals').val();
+    const mealName = $('#mealName').val();
+    waitForElm('#saveMealBtn').then((elm) => {
+        if (editMeal || mealName) {
+            $(elm).prop('disabled', false);
+        }
+        else {
+            $(elm).prop('disabled', true);
+        }
+    });
+    if (editMeal || mealName) {
+        $otherInputs.prop('disabled', false);
+    }
+    else {
+        $otherInputs.prop('disabled', true);
+    }
+});
+
 
 function getIngredients() {
     return new Promise((resolve, reject) => {
@@ -25,7 +51,7 @@ function addNewIngredient(num) {
         .then((resp) => {
             const ingredientList = resp;
             var ingrSelect = `
-                <select class="form-select ingr-select" name="ingredient"required>
+                <select class="form-select ingr-select" name="ingredient" required>
                 <option value="" disabled selected>Ingredient</option>
             `;
             ingredientList.forEach(ingr => {
@@ -131,20 +157,28 @@ function mealToJson() {
     };
     const $ingrRows = formData.find('#ingredients .row');
     // create the ingredients
-    var ingredients = [];
+    var ingredients = [];    
     $ingrRows.each(function() {
         const $ingr = $(this);
-        const $name = $ingr.find('select[name=ingredient]');
-        const $quantity = $ingr.find('input[name=quantity]');
-        const $unit = $ingr.find('select[name=unit]');
-
-        const ingredient = {
-            "name": $($name).val(),
-            "quantity": $($quantity).val(),
-            "unit": $($unit).val()
-        };
-        ingredients.push(ingredient);
+        const $name = $ingr.find('select[name=ingredient]').val();
+        const $quantity = $ingr.find('input[name=quantity]').val();
+        const $unit = $ingr.find('select[name=unit]').val();
+        
+        var ingredient = {}
+        
+        if ($name) {
+            ingredient['name'] = $name;
+            if ($quantity && $unit) {
+                ingredient['quantity'] = $quantity;
+                ingredient['unit'] = $unit;
+            }
+        }
+        // don't save rows with no ingredient name
+        if (Object.keys(ingredient).length) {
+            ingredients.push(ingredient);
+        }
     });
+
     jsonMeal["ingredients"] = ingredients;
     meal[id] = jsonMeal;
 
@@ -211,7 +245,9 @@ function prettyBool(val) {
 // create the Datatable
 var table = $('#mealsTable').DataTable({
     columnDefs: [
+        { className: 'text-center', targets: [3, 4]},
         { target: 0, visible: false },
+        { target: 2, visible: false },
         { target: 5, visible: false },
         { target: 6, visible: false },
         { target: 7, visible: false }
@@ -349,37 +385,39 @@ function waitForElm(selector) {
 function editMeal() {
     // gets a meal and populates the form with the data so that it can be edited
     const id = $('#editMeals option:selected').val();
-    getMeals('a_meal', id)
-        .then((resp) => {
-            const meal = resp[id];
-            $('#mealId').val(id);
-            $('#mealName').val(meal['name']);
-            $('#region').val(meal['region']);
-            $('#course').val(meal['course']);
-            $('#serving').val(meal['serving']);
-            $('#description').val(meal['description']);
+    if (id) {   // if the form isn't being reset
+        getMeals('a_meal', id)
+            .then((resp) => {
+                const meal = resp[id];
+                $('#mealId').val(id);
+                $('#mealName').val(meal['name']);
+                $('#region').val(meal['region']);
+                $('#course').val(meal['course']);
+                $('#serving').val(meal['serving']);
+                $('#description').val(meal['description']);
 
-            // get the number of ingredients
-            ingr_count = meal['ingredients'].length;
-            $('#ingredients').empty();
-            addNewIngredient(ingr_count);
-            
-            meal['ingredients'].forEach((ingr, index) => {
-                // wait for the element to exist before setting the values
-                waitForElm(`#ingrRow-${index+1}`).then((elem) => {
-                    $(elem).find('select[name=ingredient]').val(ingr['name']).trigger('change');
-                    $(elem).find('input[name=quantity]').val(ingr['quantity']);
-                    $(elem).find('select[name=unit]').val(ingr['unit']);
+                // get the number of ingredients
+                ingr_count = meal['ingredients'].length;
+                $('#ingredients').empty();
+                addNewIngredient(ingr_count);
+                
+                meal['ingredients'].forEach((ingr, index) => {
+                    // wait for the element to exist before setting the values
+                    waitForElm(`#ingrRow-${index+1}`).then((elem) => {
+                        $(elem).find('select[name=ingredient]').val(ingr['name']).trigger('change');
+                        $(elem).find('input[name=quantity]').val(ingr['quantity']);
+                        $(elem).find('select[name=unit]').val(ingr['unit']);
+                    });
                 });
-            });
 
-            const updateBtns = `
-                <button type="button" id="updateBtn"class="btn btn-primary" onclick="updateMeal()">Update Meal</button>
-                <button type="button" id="deleteBtn"class="btn btn-danger" onclick="deleteMeal()">Delete Meal</button>
-            `;
-            
-            $('#saveBtn').replaceWith(updateBtns);
-        });
+                const updateBtns = `
+                    <button type="button" id="updateBtn"class="btn btn-primary" onclick="updateMeal()">Update Meal</button>
+                    <button type="button" id="deleteBtn"class="btn btn-danger" onclick="deleteMeal()">Delete Meal</button>
+                `;
+                
+                $('#saveMealBtn').replaceWith(updateBtns);
+            });
+    }
 }
 
 
@@ -387,16 +425,16 @@ function resetForm() {
     $('#createMealForm')[0].reset();
     $('#ingredients').empty();
     addNewIngredient(1);
-    $('#editMeals').val($('#editMeals option:first').val());
-    const saveBtn = '<button type="button" id="saveBtn" class="btn btn-primary" onclick="saveMeal()">Save Meal</button>';
+    $('#editMeals').val($('#editMeals option:first').val()).trigger('change');
+    const saveMealBtn = '<button type="button" id="saveMealBtn" class="btn btn-primary" onclick="saveMeal()" disabled>Save Meal</button>';
     $('#updateBtn, #deleteBtn').remove();
     
-    if (!$('#saveBtn').length) {
-        $('#formBtns').prepend(saveBtn);
+    if (!$('#saveMealBtn').length) {
+        $('#formBtns').prepend(saveMealBtn);
     }
     
     getMeals('all_meals')
-        .then(resp =>{
+        .then((resp) => {
             updateMaxId(resp);
         });
 }

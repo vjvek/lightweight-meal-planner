@@ -1,14 +1,63 @@
+/* || GENERAL STYLES */
+
+body {
+    font-family: 'Quicksand', sans-serif;
+}
+
 body, div.container {
-    background-color: rgb(249, 242, 242);
+    background-color: rgb(255 250 211);
+}
+
+
+/* || SITEWIDE */
+
+h1 {
+    font-family: 'Indie Flower', cursive;
+    font-size: 3.5em;
+}
+
+#navbar {
+    background-color: #c9ffc1;
+}
+
+.nav-link {
+    color: #2e1acd;
+}
+
+h3 {
+    margin-bottom: 10px;
+}
+
+hr {
+    height: 5px;
+    border: none;
+    background: #22ff00;
+}
+
+/* .nav-link.active {
+    color: grey !important;
+} */
+
+/* CREATE A MEAL / PLAN SECTIONS */
+
+.font-small {
+    font-size: 0.8em;
 }
 
 input, select, button {
     margin-bottom: 10px;
 }
 
+input:not([type="checkbox"]), select, textarea {
+    background-color: rgb(255 253 235) !important;
+}
+
+
 #serving {
     margin-bottom: 10px;
 }
+
+/* for mobile screens */
 
 @media screen and (max-width: 768px) {
     input[name="quantity"] {
@@ -16,9 +65,6 @@ input, select, button {
     }
 }
 
-.font-small {
-    font-size: 12px;
-}
 
 /* .select2-search {
     background-color: #00f !important;
@@ -45,13 +91,6 @@ input, select, button {
     height: 34px !important;
 }
 
-hr {
-    color: red;
-}
-
-h3 {
-    margin-bottom: 10px;
-}
 
 textarea {
     width: 100%;
@@ -64,11 +103,30 @@ textarea {
     white-space: pre-line;
 }
 
+/* DATATABLE */
+
 #mealsTable {
     width: 100% !important;
 }
 
-#mealsTable th:nth-child(3), #mealsTable td:nth-child(3),
-#mealsTable th:nth-child(4), #mealsTable td:nth-child(4){
-    text-align: center;
+#mealsTable_wrapper {
+    border: 2px solid black;
+    border-radius: 2px;
+    padding: 5px 5px 5px 5px;
+}
+
+#mealsTable.dataTable.display tbody tr.odd > .sorting_1 {
+    background-color: red;
+}
+ 
+#mealsTable.dataTable.display tbody tr.odd {
+    background-color: red;
+}
+ 
+#mealsTable.dataTable.display tbody tr.even > .sorting_1 {
+    background-color: green;
+}
+ 
+#mealsTable.dataTable.display tbody tr.even {
+    background-color: green;
 }

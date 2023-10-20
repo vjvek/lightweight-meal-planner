@@ -9,6 +9,10 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+        <!-- Google Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Quicksand&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="static/css/style.css">
         <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -21,20 +25,24 @@
                     <h1 class="mb-4">Meal Planner</h1>
                 </div>
             </div>
-            <ul class="nav nav-underline justify-content-center" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" data-bs-toggle="tab" href="#mealViewer">My Meals</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="tab" href="#mealplanner">Meal Planner</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="tab" href="#createMeal">Create a Meal</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="tab" href="#createMealPlan">Create a Meal Plan</a>
-                </li>
-            </ul>
+            <div class="row">
+                <div id="navbar" class="col py-3">
+                    <ul class="nav nav-underline justify-content-center" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#mealViewer">My Meals</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#mealplanner">Meal Planner</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#createMeal">Create a Meal</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#createMealPlan">Create a Meal Plan</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
             <div class="tab-content">
                 <!-- View Meals -->
                 <div id="mealViewer" class="container tab-pane active"><br>
@@ -76,7 +84,7 @@
                 </div>
                 <!-- Meal Planner -->
                 <div id="mealplanner" class="container tab-pane fade"><br>
-                    <h3>My Meal Plan</h3>
+                    <h3>Meal Planner</h3>
                 </div>
                 <!-- Create/Edit a Meal -->
                     <div id="createMeal" class="container tab-pane fade"><br>
@@ -98,8 +106,8 @@
                                             <div class="col-sm-12 col-md-6 col-lg-4">
                                                 <input type="hidden" id="mealId" name="mealId">
                                                 <input type="text" class="form-control" id="mealName" name="name" placeholder="Meal Name" required>
-                                                <input type="text" class="form-control" id="region" name="region" placeholder="Region" required>
-                                                <select name="course" id="course" class="form-select" required>
+                                                <input type="text" class="form-control" id="region" name="region" placeholder="Region" required disabled>
+                                                <select name="course" id="course" class="form-select" required disabled>
                                                     <option value="" disabled selected>Course</option>
                                                     <option value="starter">Starter</option>
                                                     <option value="main">Main</option>
@@ -107,10 +115,10 @@
                                                     <option value="condiment">Condiment</option>
                                                     <option value="other">Other</option>
                                                 </select>
-                                                <input type="number" class="form-control" id="serving" name="serving" placeholder="Servings"></input>
+                                                <input type="number" class="form-control" id="serving" name="serving" placeholder="Serving Size" disabled></input>
                                             </div>
                                             <div class="col-sm-12 col-md-6 col-lg-8">
-                                                <textarea name="description" id="description" placeholder="Add a description here eg. the recipe steps"></textarea>
+                                                <textarea name="description" id="description" placeholder="Add a description here eg. the recipe steps" disabled></textarea>
                                             </div>
                                         </div>
                                         <hr>
@@ -127,7 +135,7 @@
                                         <div id="ingredients"></div>
                                         <hr>
                                         <div id="formBtns">
-                                            <button type="button" id="saveBtn" class="btn btn-primary" onclick="saveMeal()">Save Meal</button>
+                                            <button type="button" id="saveMealBtn" class="btn btn-primary" onclick="saveMeal()">Save Meal</button>
                                             <button type="button" class="btn btn-warning" onclick="resetForm()">Reset Form</button>
                                         </div>
                                     </div>
@@ -138,17 +146,11 @@
                 </div>
                 <!-- Create Meal Plan -->
                 <div id="createMealPlan" class="container tab-pane fade"><br>
-                    <h3>Plan your Meals</h3>
+                    <h3>Create a Meal Plan</h3>
                 </div>                
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
         <script src="static/js/script.js"></script>
-        <script>
-            $(document).ready(() => {
-                addNewIngredient(1);
-                updateApp();
-            });
-        </script>
     </body>
 </html>
