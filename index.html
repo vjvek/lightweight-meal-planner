@@ -13,10 +13,11 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Quicksand&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="static/css/style.css">
+        
         <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+        <link rel="stylesheet" href="static/css/style.css">
     </head>
     <body>
         <div class="container">
@@ -129,7 +130,7 @@
                                             </div>
                                             <div class="col-auto">
                                                 <button type="button" class="btn btn-primary" title="Add Another Ingredient" onclick="addNewIngredient(1)"><i class="bi bi-plus-lg"></i></button>
-                                                <button type="button" class="btn btn-danger" title="Delete Selected" onclick="deleteIngredient()"><i class="bi bi-trash"></i></button>
+                                                <button type="button" id="dltIngrBtn" class="btn btn-danger" title="Delete Selected" onclick="deleteIngredient()" disabled><i class="bi bi-trash"></i></button>
                                             </div>
                                         </div>
                                         <div id="ingredients"></div>

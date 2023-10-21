@@ -3,7 +3,8 @@ var latestId = 1;
 addNewIngredient(1);
 updateApp();
 $('#editMeals').select2({ width: '100%' });
-// disable most of the inputs in the create a meal section
+
+// handles disabling of the inputs in the create a meal section
 var $initInputs = $('#editMeals, #mealName');
 var $otherInputs = $('#createMeal :input:not(#editMeals, #mealName)')
 
@@ -45,6 +46,19 @@ function getIngredients() {
 }
 
 
+function isChecked() {
+    // only enable the delete ingredient button if any rows are checked. There must always be at least 1 inrgedient row
+    const checkedCount = $('#ingredients input[type="checkbox"]:checked').length
+    const ingrRowCount = $('[id^="ingrRow"]').length
+    if (checkedCount && ingrRowCount > 1 && checkedCount < ingrRowCount) {
+        $('#dltIngrBtn').prop('disabled', false);
+    }
+    else {
+        $('#dltIngrBtn').prop('disabled', true);
+    }    
+}
+
+
 function addNewIngredient(num) {
     var ingredients = '';
     getIngredients()
@@ -64,7 +78,7 @@ function addNewIngredient(num) {
             const html = `
                 <div id="ingrRow-${i}" class="row ps-3">
                     <div class="col-sm-1 col-md-auto d-flex align-items-center form-check pe-0">
-                        <input class="form-check-input" type="checkbox" title="Delete this ingredient">
+                        <input class="form-check-input" type="checkbox" title="Delete this ingredient" onclick="isChecked()">
                     </div>
                     <div class="col-sm-11 col-md-6 col-lg-3">
                         ${ingrSelect}
