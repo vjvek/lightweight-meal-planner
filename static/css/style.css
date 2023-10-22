@@ -130,3 +130,9 @@ textarea {
 #mealsTable.dataTable.display tbody tr.even {
     background-color: green;
 }
+
+/* Meal Detail Section */
+
+#servingInpt {
+    width: 50%;
+}

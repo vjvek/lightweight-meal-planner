@@ -269,6 +269,7 @@ var table = $('#mealsTable').DataTable({
     order: [[1, 'asc']] // order by name
 });
 
+
 function updateTable(data) {
     table
         .clear()
@@ -319,11 +320,12 @@ function updateTable(data) {
     });
     
     table.rows.add(meals).draw();
-    
+    // when a row in the table is clicked show the meal details
     $('#mealsTable').on('click', 'tbody tr', function() {
         const data = table.row(this).data();
         const name = data[1];
         const header = `<h3>${name}</h3><p class="font-small">Original Serving Size (<span id="ogServingSize">${data[7]}</span>)</p>`;
+        const copyBtn = '<button type="button" class="btn btn-primary" onclick="mealToClipboard()"><i class="bi bi-copy"></i></button>'
         const ingredients = data[5];
         const description = data[6];
         const serving = data[7];
@@ -332,10 +334,58 @@ function updateTable(data) {
             <input id="servingInpt" type="number" class="form-control" min="0" value="${serving}" placeholder="Serving" onchange="updateIngrQuantity()"></input>
         `;
         $('#detailHeading').html(header);
-        $('#servingCalc').html(servingInpt);
+        $('#mealToClipboard').html(copyBtn);
+        $('#detailHeading').append(servingInpt);
         $('#detailIngredients').html(ingredients);
         $('#detailDescription').html(description);
     });
+}
+
+
+function mealToClipboard() {
+    
+    var textToCopy = '';
+    const name = $('#detailHeading h3').text();
+    const serving = $('#servingInpt').val();
+    textToCopy = `${name}\n\nServing Size: ${serving}`;
+
+    const ingrs = $('#detailIngredients').find('li.ingr-shown');
+    if (ingrs.length) {
+        textToCopy += '\n\n';
+        ingrs.each(function() {
+            textToCopy += $(this).text() + '\n';
+        });
+    }
+    const description = $('#detailDescription p').text();
+    textToCopy += '\n\n' + description;
+    
+    if (window.location.protocol == 'http:') {
+        const clipboardInput = $('<textarea>');
+        $('#detailDescription').after(clipboardInput);
+        
+        clipboardInput.val(textToCopy).select();
+        document.execCommand("copy");
+        clipboardInput.remove();
+    }
+    else {
+        const clipboardText = async () => {
+            try {
+                await navigator.clipboard.writeText(newClip);
+            }
+            catch(err) {
+                alert('Failed to copy to clipboard. This browser may not support the API being used.\n\n', err)
+            }
+        }
+    }
+    
+    const checkIcon = '<i class="bi bi-check2"></i>';
+    const copyIcon = '<i class="bi bi-copy"></i>';
+    const $copyBtn = $('#mealToClipboard button');
+    $copyBtn.html(checkIcon);
+    
+    setTimeout(() => {
+        $copyBtn.html(copyIcon);
+    }, 1500);
 }
 
 
