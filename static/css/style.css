@@ -1,13 +1,18 @@
 /* || GENERAL STYLES */
 
+:root {
+    --nav-bar: #c9ffc1;
+    --input-bg-color: rgb(255 253 235);
+}
+
 body {
     font-family: 'Quicksand', sans-serif;
 }
 
 body, div.container {
     background-color: rgb(255 250 211);
-}
 
+}
 
 /* || SITEWIDE */
 
@@ -17,7 +22,7 @@ h1 {
 }
 
 #navbar {
-    background-color: #c9ffc1;
+    background-color: var(--nav-bar);
 }
 
 .nav-link {
@@ -31,7 +36,14 @@ h3 {
 hr {
     height: 5px;
     border: none;
-    background: #22ff00;
+    background: var(--nav-bar);
+}
+
+/* for mobile screens */
+@media screen and (max-width: 768px) {
+    input[name="quantity"] {
+        margin-top: 10px;
+    }
 }
 
 /* .nav-link.active {
@@ -49,48 +61,25 @@ input, select, button {
 }
 
 input:not([type="checkbox"]), select, textarea {
-    background-color: rgb(255 253 235) !important;
+    background-color: var(--input-bg-color) !important;
 }
 
+input:not([type="checkbox"]):disabled::placeholder, select:disabled, textarea:disabled::placeholder {
+    color: #d4d4d4 !important;
+}
 
 #serving {
     margin-bottom: 10px;
 }
 
-/* for mobile screens */
-
-@media screen and (max-width: 768px) {
-    input[name="quantity"] {
-        margin-top: 10px;
-    }
-}
-
-
-/* .select2-search {
-    background-color: #00f !important;
-} */
-
-/* .select2-search input {
-    color: #ffa914 !important;
-    background-color: #ff12d0 !important;
-} */
-
-/* css for highlighted option */
-/* .select2-results__option.select2-results__option--selectable.select2-results__option--highlighted {
-    background-color: #ed2828 !important;
-} */
-
 .select2-selection__rendered {
     line-height: 37.33px !important;
     margin-bottom: 10px;
 }
+
 .select2-container .select2-selection--single {
     height: 37.33px !important;
 }
-.select2-selection__arrow {
-    height: 34px !important;
-}
-
 
 textarea {
     width: 100%;
@@ -103,36 +92,45 @@ textarea {
     white-space: pre-line;
 }
 
+/* SELECT2 */
+
+.select2-selection__arrow {
+    height: 34px !important;
+}
+
+.select2-selection.select2-selection--single, .select2-search,
+.select2-results__option.select2-results__option--selectable,
+.select2-results__option.select2-results__option--disabled {
+    background-color: var(--input-bg-color);
+}
+
+.select2-search input {
+    color: var(--input-bg-color) !important;
+    background-color: var(--input-bg-color) !important;
+}
+
+/* css for highlighted option */
+.select2-results__option.select2-results__option--selectable.select2-results__option--highlighted {
+    color: black;
+    background-color: #c9ffc1 !important;
+}
+
 /* DATATABLE */
 
 #mealsTable {
     width: 100% !important;
 }
 
-#mealsTable_wrapper {
-    border: 2px solid black;
-    border-radius: 2px;
-    padding: 5px 5px 5px 5px;
+#mealsTable tbody {
+    background-color: var(--input-bg-color);
 }
 
-#mealsTable.dataTable.display tbody tr.odd > .sorting_1 {
-    background-color: red;
-}
- 
-#mealsTable.dataTable.display tbody tr.odd {
-    background-color: red;
-}
- 
-#mealsTable.dataTable.display tbody tr.even > .sorting_1 {
-    background-color: green;
-}
- 
-#mealsTable.dataTable.display tbody tr.even {
-    background-color: green;
+#mealsTable tr:hover {
+    background-color: var(--nav-bar);
 }
 
 /* Meal Detail Section */
 
 #servingInpt {
-    width: 50%;
+    width: 20%;
 }

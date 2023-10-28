@@ -11,12 +11,12 @@ var $otherInputs = $('#createMeal :input:not(#editMeals, #mealName)')
 $initInputs.on('change', () => {
     const editMeal = $('#editMeals').val();
     const mealName = $('#mealName').val();
-    waitForElm('#saveMealBtn').then((elm) => {
+    waitForElm('#saveMealBtn').then((btn) => {
         if (editMeal || mealName) {
-            $(elm).prop('disabled', false);
+            $(btn).prop('disabled', false);
         }
         else {
-            $(elm).prop('disabled', true);
+            $(btn).prop('disabled', true);
         }
     });
     if (editMeal || mealName) {
@@ -281,22 +281,26 @@ function updateTable(data) {
         const id = Object.keys(meal)[0];
         var ingredients = '<h5>Ingredients</h5>';
         // build the inrgedients
-        if (meal[id]['ingredients'][0]['name']) {
+        if (meal[id]['ingredients'].length) {
             meal[id]['ingredients'].forEach((ingr, index) => {
                 if (index === 0) {
                     ingredients += '<ul>';
                 }
+                var quantity = '';
+                if (ingr['quantity']) {
+                    var quantity = `<strong><span class="meal-view-quantity">${ingr['quantity']}</strong> (${ingr['unit']})</span>`;
+                }
                 ingredients += `
-                    <li class="ingr-shown">${ingr['name']} <strong><span class="meal-view-quantity">${ingr['quantity']}</span> (${ingr['unit']})</strong></li>
-                    <li class="ingr-hidden" hidden>${ingr['name']} <strong><span class="meal-view-quantity">${ingr['quantity']}</span> (${ingr['unit']})</strong></li>
+                    <li class="ingr-shown">${ingr['name']} <strong>${quantity}</strong></li>
+                    <li class="ingr-hidden" hidden>${ingr['name']} <strong>${quantity}</strong></li>
                 `;
             });
+            ingredients += '</ul>';
         }
         else {
             ingredients += "<p>This meal doesn't have any ingredients so go add some MUPPET<p>";
         }
-        ingredients += '</ul>';
-        
+
         if (meal[id]['description']) {
             var description = meal[id]['description']
         }
@@ -311,7 +315,7 @@ function updateTable(data) {
             meal[id]['name'],
             meal[id]['region'],
             prettyBool(meal[id]['description']),
-            prettyBool(meal[id]['ingredients'][0]['name']),
+            prettyBool(meal[id]['ingredients'].length),
             ingredients,
             instructions,
             meal[id]['serving']
@@ -324,18 +328,27 @@ function updateTable(data) {
     $('#mealsTable').on('click', 'tbody tr', function() {
         const data = table.row(this).data();
         const name = data[1];
-        const header = `<h3>${name}</h3><p class="font-small">Original Serving Size (<span id="ogServingSize">${data[7]}</span>)</p>`;
-        const copyBtn = '<button type="button" class="btn btn-primary" onclick="mealToClipboard()"><i class="bi bi-copy"></i></button>'
-        const ingredients = data[5];
-        const description = data[6];
         const serving = data[7];
-        const servingInpt = `
+        const ingredients = data[5];
+        const hasQuantities = $(ingredients).find('.meal-view-quantity').length;
+        var servingHtml = '<p class="font-small">There is no serving size saved for this meal.</p>';
+        var servingInpt = '';
+        if (serving) {
+            servingHtml = `<p class="font-small">Original Serving Size (<span id="ogServingSize">${data[7]}</span>)</p>`;
+        }
+        
+        if (serving && hasQuantities) {
+            servingInpt = `
             <label for="servingInpt" class="form-label">Change Serving Size</label>
-            <input id="servingInpt" type="number" class="form-control" min="0" value="${serving}" placeholder="Serving" onchange="updateIngrQuantity()"></input>
-        `;
+            <input id="servingInpt" type="number" class="form-control" min="1" value="${serving}" placeholder="Serving" onchange="updateIngrQuantity()"></input>
+            `;
+        }
+        
+        const header = `<h3>${name}</h3>${servingHtml}` + servingInpt;
+        const copyBtn = '<button type="button" class="btn btn-primary" onclick="mealToClipboard()"><i class="bi bi-copy"></i></button>'
+        const description = data[6];
         $('#detailHeading').html(header);
         $('#mealToClipboard').html(copyBtn);
-        $('#detailHeading').append(servingInpt);
         $('#detailIngredients').html(ingredients);
         $('#detailDescription').html(description);
     });
@@ -390,11 +403,11 @@ function mealToClipboard() {
 
 
 function updateIngrQuantity() {
-    const $ingredientsHidden = $('#detailIngredients li.ingr-hidden');
-    const $ingredientsShown = $('#detailIngredients li.ingr-shown');
+    const $ingredientsHidden = $('#detailIngredients li.ingr-hidden:has(span.meal-view-quantity)');
+    const $ingredientsShown = $('#detailIngredients li.ingr-shown:has(span.meal-view-quantity)');
     const ogServingSize = parseInt($('#ogServingSize').text());
     const newServingSize = parseInt($('#servingInpt').val());
-    const percentChange = newServingSize / ogServingSize
+    const percentChange = newServingSize / ogServingSize;
     
     $ingredientsHidden.each( (index, ingr) => {
         const $ingr = $(ingr);
@@ -461,16 +474,21 @@ function editMeal() {
                 $('#description').val(meal['description']);
 
                 // get the number of ingredients
-                ingr_count = meal['ingredients'].length;
+                if (meal['ingredients'].length) {
+                    var ingr_count = meal['ingredients'].length;
+                }
+                else {
+                    var ingr_count = 1;
+                }
                 $('#ingredients').empty();
                 addNewIngredient(ingr_count);
                 
                 meal['ingredients'].forEach((ingr, index) => {
                     // wait for the element to exist before setting the values
-                    waitForElm(`#ingrRow-${index+1}`).then((elem) => {
-                        $(elem).find('select[name=ingredient]').val(ingr['name']).trigger('change');
-                        $(elem).find('input[name=quantity]').val(ingr['quantity']);
-                        $(elem).find('select[name=unit]').val(ingr['unit']);
+                    waitForElm(`#ingrRow-${index+1}`).then((ingrRow) => {
+                        $(ingrRow).find('select[name=ingredient]').val(ingr['name']).trigger('change');
+                        $(ingrRow).find('input[name=quantity]').val(ingr['quantity']);
+                        $(ingrRow).find('select[name=unit]').val(ingr['unit']);
                     });
                 });
 
