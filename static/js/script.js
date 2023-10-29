@@ -166,8 +166,12 @@ function mealToJson() {
         "name": formData.find('#mealName').val(),
         "region": formData.find('#region').val(),
         "course": formData.find('#course').val(),
-        "serving": formData.find('#serving').val(),
-        "description": formData.find('#description').val(),
+        "serv": formData.find('#serving').val(),
+        "time": {
+            "len": formData.find('#totalTime').val(),
+            "unit": formData.find('#timeUnit').val()
+        },
+        "desc": formData.find('#description').val(),
     };
     const $ingrRows = formData.find('#ingredients .row');
     // create the ingredients
@@ -183,7 +187,7 @@ function mealToJson() {
         if ($name) {
             ingredient['name'] = $name;
             if ($quantity && $unit) {
-                ingredient['quantity'] = $quantity;
+                ingredient['quant'] = $quantity;
                 ingredient['unit'] = $unit;
             }
         }
@@ -193,7 +197,7 @@ function mealToJson() {
         }
     });
 
-    jsonMeal["ingredients"] = ingredients;
+    jsonMeal["ingrs"] = ingredients;
     meal[id] = jsonMeal;
 
     return meal;
@@ -216,6 +220,7 @@ function deleteMeal() {
     const meal = mealToJson();
     postMeal(meal, 'delete');
 }
+
 
 function updateMaxId(meals) {
     if (meals) {
@@ -259,12 +264,12 @@ function prettyBool(val) {
 // create the Datatable
 var table = $('#mealsTable').DataTable({
     columnDefs: [
-        { className: 'text-center', targets: [3, 4]},
+        { className: 'text-center', targets: [3, 4, 8]},
         { target: 0, visible: false },
         { target: 2, visible: false },
         { target: 5, visible: false },
         { target: 6, visible: false },
-        { target: 7, visible: false }
+        { target: 7, visible: false },
     ],
     order: [[1, 'asc']] // order by name
 });
@@ -279,16 +284,16 @@ function updateTable(data) {
     
     data.forEach(meal => {
         const id = Object.keys(meal)[0];
-        var ingredients = '<h5>Ingredients</h5>';
+        var ingredients = '';
         // build the inrgedients
-        if (meal[id]['ingredients'].length) {
-            meal[id]['ingredients'].forEach((ingr, index) => {
+        if (meal[id]['ingrs'].length) {
+            meal[id]['ingrs'].forEach((ingr, index) => {
                 if (index === 0) {
                     ingredients += '<ul>';
                 }
                 var quantity = '';
-                if (ingr['quantity']) {
-                    var quantity = `<strong><span class="meal-view-quantity">${ingr['quantity']}</strong> (${ingr['unit']})</span>`;
+                if (ingr['quant']) {
+                    var quantity = `<strong><span class="meal-view-quantity">${ingr['quant']}</strong> (${ingr['unit']})</span>`;
                 }
                 ingredients += `
                     <li class="ingr-shown">${ingr['name']} <strong>${quantity}</strong></li>
@@ -301,24 +306,32 @@ function updateTable(data) {
             ingredients += "<p>This meal doesn't have any ingredients so go add some MUPPET<p>";
         }
 
-        if (meal[id]['description']) {
-            var description = meal[id]['description']
+        // build the description
+        if (meal[id]['desc']) {
+            var desc = meal[id]['desc']
         }
         else {
-            var description = "This meal doesn't have a description so go add one MUPPET";
+            var desc = "This meal doesn't have a description so go add one MUPPET";
         }
-        // build the description
-        const instructions = `<h5>Instructions</h5><p>${description}</p>`;
+        const description = `<h5>Instructions</h5><p>${desc}</p>`;
+        // build the meal time
+        if (meal[id]['time']['len']) {
+            var time = `${meal[id]['time']['len']} ${meal[id]['time']['unit']}`;
+        }
+        else {
+            var time = '-';
+        }
 
         mealArray = [
             id,
             meal[id]['name'],
             meal[id]['region'],
-            prettyBool(meal[id]['description']),
-            prettyBool(meal[id]['ingredients'].length),
+            prettyBool(meal[id]['desc']),
+            prettyBool(meal[id]['ingrs'].length),
             ingredients,
-            instructions,
-            meal[id]['serving']
+            description,
+            meal[id]['serv'],
+            time
         ]
         meals.push(mealArray);
     });
@@ -347,8 +360,10 @@ function updateTable(data) {
         const header = `<h3>${name}</h3>${servingHtml}` + servingInpt;
         const copyBtn = '<button type="button" class="btn btn-primary" onclick="mealToClipboard()"><i class="bi bi-copy"></i></button>'
         const description = data[6];
+        const mealTime = `<p>⏰ ${data[8]}</p>`;
         $('#detailHeading').html(header);
         $('#mealToClipboard').html(copyBtn);
+        $('#mealTime').html(mealTime);
         $('#detailIngredients').html(ingredients);
         $('#detailDescription').html(description);
     });
@@ -477,6 +492,20 @@ function waitForElm(selector) {
     });
 }
 
+function getVal() {
+    const obj = arguments[0];
+    const key1 = arguments[1];
+    if (arguments.length > 2) {
+        var key2 = arguments[2];
+        if (obj.hasOwnProperty(key1) && obj[key1].hasOwnProperty(key2)) {
+            return obj[key1][key2];
+        }
+    }
+    else {
+        return obj[key1];
+    }
+}
+
 
 function editMeal() {
     // gets a meal and populates the form with the data so that it can be edited
@@ -487,14 +516,15 @@ function editMeal() {
                 const meal = resp[id];
                 $('#mealId').val(id);
                 $('#mealName').val(meal['name']);
-                $('#region').val(meal['region']);
-                $('#course').val(meal['course']);
-                $('#serving').val(meal['serving']);
-                $('#description').val(meal['description']);
-
+                $('#region').val(getVal(meal, 'region'));
+                $('#course').val(getVal(meal, 'course'));
+                $('#serving').val(getVal(meal, 'serv'));
+                $('#totalTime').val(getVal(meal, 'time', 'len'));
+                $('#timeUnit').val(getVal(meal, 'time', 'unit'));
+                $('#description').val(getVal(meal, 'desc'));
                 // get the number of ingredients
-                if (meal['ingredients'].length) {
-                    var ingr_count = meal['ingredients'].length;
+                if (meal['ingrs'].length) {
+                    var ingr_count = meal['ingrs'].length;
                 }
                 else {
                     var ingr_count = 1;
@@ -502,11 +532,11 @@ function editMeal() {
                 $('#ingredients').empty();
                 addNewIngredient(ingr_count);
                 
-                meal['ingredients'].forEach((ingr, index) => {
+                meal['ingrs'].forEach((ingr, index) => {
                     // wait for the element to exist before setting the values
                     waitForElm(`#ingrRow-${index+1}`).then((ingrRow) => {
                         $(ingrRow).find('select[name=ingredient]').val(ingr['name']).trigger('change');
-                        $(ingrRow).find('input[name=quantity]').val(ingr['quantity']);
+                        $(ingrRow).find('input[name=quantity]').val(ingr['quant']);
                         $(ingrRow).find('select[name=unit]').val(ingr['unit']);
                     });
                 });

@@ -59,11 +59,12 @@
                                         <th scope="col">#</th>
                                         <th scope="col">Name</th>
                                         <th scope="col">Region</th>
-                                        <th scope="col">Description</th>
-                                        <th scope="col">Ingredients</th>
+                                        <th scope="col">📜</th>
+                                        <th scope="col">🥗</th>
                                         <th scope="col">IngredientText</th>
                                         <th scope="col">DescriptionText</th>
                                         <th scope="col">Serving Size</th>
+                                        <th scope="col">⏰</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -77,7 +78,17 @@
                                 <div id="mealToClipboard" class="col-2 d-flex justify-content-end align-items-start"></div>
                             </div>
                             <div class="row">
-                                <div id="detailIngredients" class="col"></div>
+                                <div class="col">
+                                    <div class="row">
+                                        <div class="col">
+                                            <h5>Ingredients</h5>
+                                        </div>
+                                        <div id="mealTime" class="col-auto"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div id="detailIngredients" class="col"></div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="row">
                                 <div id="detailDescription" class="col"></div>
@@ -108,9 +119,9 @@
                                         <div class="row">
                                             <div class="col-sm-12 col-md-6 col-lg-4">
                                                 <input type="hidden" id="mealId" name="mealId">
-                                                <input type="text" class="form-control" id="mealName" name="name" placeholder="Meal Name" required>
-                                                <input type="text" class="form-control" id="region" name="region" placeholder="Region" required disabled>
-                                                <select name="course" id="course" class="form-select" required disabled>
+                                                <input type="text" id="mealName" class="form-control" name="name" placeholder="Meal Name" required>
+                                                <input type="text" id="region" class="form-control" name="region" placeholder="Region" disabled>
+                                                <select id="course" class="form-select" name="course" disabled>
                                                     <option value="" disabled selected>Course</option>
                                                     <option value="starter">Starter</option>
                                                     <option value="main">Main</option>
@@ -118,10 +129,23 @@
                                                     <option value="condiment">Condiment</option>
                                                     <option value="other">Other</option>
                                                 </select>
-                                                <input type="number" class="form-control" id="serving" name="serving" placeholder="Serving Size" disabled></input>
+                                                <input type="number" id="serving" class="form-control" name="serving" placeholder="Serving Size" disabled></input>
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <input type="number" id="totalTime" class="form-control" name="totalTime" placeholder="Total Time" disabled></input>
+                                                    </div>
+                                                    <div class="col">
+                                                        <select name="timeUnit" id="timeUnit" class="form-select" disabled>
+                                                            <option value="" disabled selected>Unit</option>
+                                                            <option value="mins">Minutes</option>
+                                                            <option value="hours">Hours</option>
+                                                            <option value="days">Days</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="col-sm-12 col-md-6 col-lg-8">
-                                                <textarea name="description" id="description" placeholder="Add a description here eg. the recipe steps" disabled></textarea>
+                                                <textarea id="description" name="description" placeholder="Add a description here eg. the recipe steps" disabled></textarea>
                                             </div>
                                         </div>
                                         <hr>
