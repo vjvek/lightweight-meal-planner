@@ -438,6 +438,25 @@ function updateMealList(data) {
 }
 
 
+const el = document.getElementById('ingredients');
+var sortable = Sortable.create(el);
+sortable.option('disabled', true);
+
+
+function enableSortMode() {
+    $('#enableSortBtn').hide();
+    $('#disableSortBtn').show();
+    sortable.option('disabled', false);
+}
+
+
+function disableSortMode() {
+    $('#disableSortBtn').hide();
+    $('#enableSortBtn').show();
+    sortable.option('disabled', true);
+}
+
+
 function waitForElm(selector) {
     return new Promise(resolve => {
         if (document.querySelector(selector)) {
@@ -492,12 +511,9 @@ function editMeal() {
                     });
                 });
 
-                const updateBtns = `
-                    <button type="button" id="updateBtn"class="btn btn-primary" onclick="updateMeal()">Update Meal</button>
-                    <button type="button" id="deleteBtn"class="btn btn-danger" onclick="deleteMeal()">Delete Meal</button>
-                `;
-                
-                $('#saveMealBtn').replaceWith(updateBtns);
+                $('#saveMealBtn').hide();
+                $('#updateMealBtn').show();
+                $('#deleteMealBtn').show();
             });
     }
 }
@@ -508,12 +524,10 @@ function resetForm() {
     $('#ingredients').empty();
     addNewIngredient(1);
     $('#editMeals').val($('#editMeals option:first').val()).trigger('change');
-    const saveMealBtn = '<button type="button" id="saveMealBtn" class="btn btn-primary" onclick="saveMeal()" disabled>Save Meal</button>';
-    $('#updateBtn, #deleteBtn').remove();
-    
-    if (!$('#saveMealBtn').length) {
-        $('#formBtns').prepend(saveMealBtn);
-    }
+    $('#saveMealBtn').show();
+    $('#updateMealBtn').hide();
+    $('#deleteMealBtn').hide();
+    disableSortMode();
     
     getMeals('all_meals')
         .then((resp) => {
