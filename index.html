@@ -103,8 +103,19 @@
                 <!-- Create/Edit a Meal -->
                     <div id="createMeal" class="container tab-pane fade"><br>
                         <div class="row">
-                            <h3>Create a Meal</h3>
-                            <p>Create a meal or edit an existing one using the dropdown list below.</p>
+                            <div class="col">
+                                <h3>Create a Meal</h3>
+                                <p>Create a meal or edit an existing one using the dropdown list below.</p>
+                                <p>When creating a new meal, only the name is required. Everything else is optional. The meal creator provides you with the following features to help you get the most out of your meals:</p>
+                                <ul>
+                                    <li>Adding quantities to your ingredients allows you to dynamically recalculate them based on your chosen serving size</li>
+                                    <li>A sorting button to reorder ingredients</li>
+                                    <li>Create dividers to split up your ingredients into sections</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
                             <div class="col-sm-12 col-md-6 col-lg-4">
                                 <select name="editMeals" id="editMeals" class="form-select" onchange="editMeal()">
                                     <option value="" disabled selected>Edit a Meal</option>
@@ -155,7 +166,8 @@
                                                 <p></p>
                                             </div>
                                             <div class="col-auto">
-                                                <button type="button" class="btn btn-primary" title="Add Another Ingredient" onclick="addNewIngredient(1)"><i class="bi bi-plus-lg"></i></button>
+                                                <button type="button" class="btn btn-primary" title="Add Another Ingredient" onclick="addNewIngr()"><i class="bi bi-plus-lg"></i></button>
+                                                <button type="button" class="btn btn-primary" title="Add an Ingredient Divider" onclick="addIngrDiv()"><i class="bi bi-hr"></i></button>
                                                 <button type="button" id="enableSortBtn" class="btn btn-secondary" title="Enable Sort Mode" onclick="enableSortMode()"><i class="bi bi-arrow-down-up"></i></button>
                                                 <button type="button" id="disableSortBtn" class="btn btn-secondary" title="Disable Sort Mode" onclick="disableSortMode()" style="display: none;"><i class="bi bi-list-ul"></i></button>
                                                 <button type="button" id="dltIngrBtn" class="btn btn-danger" title="Delete Selected" onclick="deleteIngredient()" disabled><i class="bi bi-trash"></i></button>
@@ -164,10 +176,10 @@
                                         <div id="ingredients"></div>
                                         <hr>
                                         <div id="formBtns">
-                                            <button type="button" id="saveMealBtn" class="btn btn-primary" onclick="saveMeal()">Save Meal</button>
+                                            <button type="button" id="saveMealBtn" class="btn btn-primary" onclick="saveMeal()" disabled>Save Meal</button>
                                             <button type="button" id="updateMealBtn"class="btn btn-primary" onclick="updateMeal()" style="display: none;">Update Meal</button>
                                             <button type="button" id="deleteMealBtn"class="btn btn-danger" onclick="deleteMeal()" style="display: none;">Delete Meal</button>
-                                            <button type="button" class="btn btn-warning" onclick="resetForm()">Reset Form</button>
+                                            <button type="button" class="btn btn-warning" onclick="resetForm()" disabled>Reset Form</button>
                                         </div>
                                     </div>
                                 </form>

@@ -1,24 +1,22 @@
 var latestId = 1;
 
-addNewIngredient(1);
+observerSelect2();
+addNewIngr();
+
+setTimeout(() => {
+    ingrRow = $('#ingredients').clone().html(); // this variable is used to create new ingredients
+}, 500);
+
 updateApp();
 $('#editMeals').select2({ width: '100%' });
 
 // handles disabling of the inputs in the create a meal section
 var $initInputs = $('#editMeals, #mealName');
-var $otherInputs = $('#createMeal :input:not(#editMeals, #mealName)')
+var $otherInputs = $('#createMeal :input:not(#editMeals, #mealName, #dltIngrBtn)')
 
 $initInputs.on('change', () => {
     const editMeal = $('#editMeals').val();
     const mealName = $('#mealName').val();
-    waitForElm('#saveMealBtn').then((btn) => {
-        if (editMeal || mealName) {
-            $(btn).prop('disabled', false);
-        }
-        else {
-            $(btn).prop('disabled', true);
-        }
-    });
     if (editMeal || mealName) {
         $otherInputs.prop('disabled', false);
     }
@@ -28,6 +26,41 @@ $initInputs.on('change', () => {
 });
 
 
+/**
+ * Create a mutation observer that looks for select elements in specific DOM nodes.
+ * When this is observed, apply `select2` to it. 
+ */
+function observerSelect2() {
+    // create a mutation observer that watches #ingredients
+    const targetNode = document.getElementById("ingredients");
+    // Options for the observer (which mutations to observe)
+    const config = { childList: true, subtree: true };
+    // Callback function to execute when mutations are observed
+    const callback = (mutationList, observer) => {
+        for (const mutation of mutationList) {
+            if (mutation.type === "childList" && mutation.addedNodes.length >= 1) {
+                // apply select2 to the ingredients rows
+                const $newNode = $(mutation.addedNodes[1])
+                isNewIngr = $newNode.hasClass('ingr-row') || $newNode.hasClass('ingr-div');
+                if (isNewIngr) {
+                    setTimeout(() => {
+                        $('.ingr-select').select2({ width: '100%' });
+                    }, 500);
+                }
+            }
+        }
+    };
+    // Create an observer instance linked to the callback function
+    const observer = new MutationObserver(callback);
+    // Start observing the target node for configured mutations
+    observer.observe(targetNode, config);
+}
+
+
+/**
+ * AJAX request to get all the ingredients.
+ * @returns {array} - Array of all the inrgedients
+ */
 function getIngredients() {
     return new Promise((resolve, reject) => {
         $.ajax({
@@ -46,20 +79,10 @@ function getIngredients() {
 }
 
 
-function isChecked() {
-    // only enable the delete ingredient button if any rows are checked. There must always be at least 1 inrgedient row
-    const checkedCount = $('#ingredients input[type="checkbox"]:checked').length
-    const ingrRowCount = $('[id^="ingrRow"]').length
-    if (checkedCount && ingrRowCount > 1 && checkedCount < ingrRowCount) {
-        $('#dltIngrBtn').prop('disabled', false);
-    }
-    else {
-        $('#dltIngrBtn').prop('disabled', true);
-    }    
-}
-
-
-function addNewIngredient(num) {
+/**
+ * Creates the ingredient row that allows a user to save an ingredient against a meal.
+ */
+function addNewIngr() {
     var ingredients = '';
     getIngredients()
         .then((resp) => {
@@ -74,43 +97,83 @@ function addNewIngredient(num) {
             });
             ingrSelect += '</select>';
 
-        for (let i = 1; i <= num; i++) {
-            const html = `
-                <div id="ingrRow-${i}" class="row ps-3">
-                    <div class="col-sm-1 col-md-auto d-flex align-items-center form-check pe-0">
-                        <input class="form-check-input" type="checkbox" title="Delete this ingredient" onclick="isChecked()">
-                    </div>
-                    <div class="col-sm-11 col-md-6 col-lg-3">
-                        ${ingrSelect}
-                    </div>
-                    <div class="col-sm-12 col-md-3 col-lg-3">
-                        <input type="number" class="form-control" name="quantity" min="0" placeholder="Quantity">
-                    </div>
-                    <div class="col-sm-12 col-md-3 col-lg-3">
-                        <select name="unit" class="form-select">
-                            <option value="" disabled selected>Unit</option>
-                            <option value="g">Grams (g)</option>
-                            <option value="ml">Millilitres (ml)</option> 
-                            <option value="tsp">Teaspoon (tsp)</option>
-                            <option value="tbsp">Tablespoon (tbsp)</option>
-                            <option value="cups">Cups</option>
-                            <option value="whole">Whole</option>
-                            <option value="sprigs">Sprigs</option>
-                            <option value="Sticks">Sticks</option>
-                        </select>
-                    </div>
-                </div>`;
-            ingredients += html;
-        }
+        const html = `
+            <div class="row ps-3 ingr-row">
+                <div class="col-sm-1 col-md-auto d-flex align-items-center form-check pe-0">
+                    <input class="form-check-input" type="checkbox" title="Delete this ingredient" onclick="isChecked()">
+                </div>
+                <div class="col-sm-11 col-md-6 col-lg-3">
+                    ${ingrSelect}
+                </div>
+                <div class="col-sm-12 col-md-3 col-lg-3">
+                    <input type="number" class="form-control" name="quantity" min="0" placeholder="Quantity">
+                </div>
+                <div class="col-sm-12 col-md-3 col-lg-3">
+                    <select name="unit" class="form-select">
+                        <option value="" disabled selected>Unit</option>
+                        <option value="g">Grams (g)</option>
+                        <option value="ml">Millilitres (ml)</option> 
+                        <option value="tsp">Teaspoon (tsp)</option>
+                        <option value="tbsp">Tablespoon (tbsp)</option>
+                        <option value="cups">Cups</option>
+                        <option value="whole">Whole</option>
+                        <option value="sprigs">Sprigs</option>
+                        <option value="Sticks">Sticks</option>
+                    </select>
+                </div>
+            </div>`;
+        ingredients += html;
+
         $('#ingredients').append(ingredients);
-        // only applies select2 once the ingredients nodes have been added
-        waitForElm('[id^="ingrRow"]').then( () => {
-            $('.ingr-select').select2({ width: '100%' });
-        });
     });
 }
 
 
+/**
+ * Creates the html for the ingredient divider.
+ * @returns {string} div - string of the html for the divider input.
+ */
+function createIngrDiv() {
+    const div = `
+        <div class="row ps-3 ingr-div">
+            <div class="col-sm-1 col-md-auto d-flex align-items-center form-check pe-0">
+                <input class="form-check-input" type="checkbox" title="Delete this divider" onclick="isChecked()">
+            </div>
+            <div class="col-sm-11 col-md-6 col-lg-9">
+                <input type="text" class="form-control" name="ingrDiv" placeholder="Splits ingredients into sections with some text eg. these ingredients are for the pie filling:">
+            </div>
+        </div>
+    `;
+    return div;
+}
+
+
+/**
+ * Adds the ingredient divider html to the DOM.
+ */
+function addIngrDiv() {
+    $('#ingredients').append(createIngrDiv());
+}
+
+
+/**
+ * Only enable the delete ingredient button if any rows are checked. 
+ * There must always be at least 1 inrgedient row.
+ */
+function isChecked() {
+    const checkedCount = $('#ingredients input[type="checkbox"]:checked').length;
+    if (checkedCount) {
+        $('#dltIngrBtn').prop('disabled', false);
+    }
+    else {
+        $('#dltIngrBtn').prop('disabled', true);
+    }    
+}
+
+
+/**
+ * Allows a user to delete ingredients and their dividers.
+ */
 function deleteIngredient() {
     // delete the selected ingredients
     const toDelete = $('#ingredients input[type=checkbox]:checked');
@@ -120,6 +183,12 @@ function deleteIngredient() {
 }
 
 
+/**
+ * AJAX GET request to get all meals or a specific one via the id.
+ * @param {string} type - Determines type of get request. Should be 'all_meals' or 'a_meal'
+ * @param {number} id - Id of the meal when a single meal is requested
+ * @returns {array} - Array of the meal(s).
+ */
 function getMeals(type, id) {
     return new Promise((resolve, reject) => {
         $.ajax({
@@ -128,7 +197,6 @@ function getMeals(type, id) {
             datatype: 'json',
             data: {'type': type, 'id': id},
             success: (resp, text, xhr) => {
-                // console.log('getMeal', type, resp);
                 resolve(JSON.parse(resp));
             },
             error: (xhr, text, err) => {
@@ -138,7 +206,14 @@ function getMeals(type, id) {
     });
 }
 
-
+/**
+ * AJAX POST request to send a meal back to the server.
+ * @param {Object} meal - A dictionary of the meal to be POSTed
+ * @param {string} mode - Takes in 1 of 3 values:
+ * 1. `create` - Tells the server the meal being POSTed is a new one
+ * 2. `update` - An existing meal is being udpated
+ * 3. `delete` - Delete this meal
+ */
 function postMeal(meal, mode) {
     $.ajax({
         type: "POST",
@@ -153,16 +228,24 @@ function postMeal(meal, mode) {
             updateMaxId(meals);
             updateApp();
             resetForm();
+        },
+        error: (xhr, text, err) => {
+            reject(err);
         }
     });
 }
 
 
-function mealToJson() {
+/**
+ * Takes values in the create/edit a meal form and puts it into a dictionary.
+ * This can then be POSTed back to the server.
+ * @returns {Object} meal - Dictionary containing the meal details
+ */
+function mealToDict() {
     const formData = $('#createMealForm');
     const id = $('#mealId').val();
     const meal = {};
-    const jsonMeal = {
+    const dictMeal = {
         "name": formData.find('#mealName').val(),
         "region": formData.find('#region').val(),
         "course": formData.find('#course').val(),
@@ -178,50 +261,71 @@ function mealToJson() {
     var ingredients = [];    
     $ingrRows.each(function() {
         const $ingr = $(this);
-        const $name = $ingr.find('select[name=ingredient]').val();
-        const $quantity = $ingr.find('input[name=quantity]').val();
-        const $unit = $ingr.find('select[name=unit]').val();
-        
-        var ingredient = {}
-        
-        if ($name) {
-            ingredient['name'] = $name;
-            if ($quantity && $unit) {
-                ingredient['quant'] = $quantity;
-                ingredient['unit'] = $unit;
+        // handles ingredients
+        if ($ingr.hasClass('ingr-row')) {
+            const $name = $ingr.find('select[name="ingredient"]').val();
+            const $quantity = $ingr.find('input[name="quantity"]').val();
+            const $unit = $ingr.find('select[name="unit"]').val();
+
+            var ingredient = {}
+            
+            if ($name) {
+                ingredient['name'] = $name;
+                if ($quantity && $unit) {
+                    ingredient['quant'] = $quantity;
+                    ingredient['unit'] = $unit;
+                }
+            }
+            // don't save rows with no ingredient name
+            if (Object.keys(ingredient).length) {
+                ingredients.push(ingredient);
             }
         }
-        // don't save rows with no ingredient name
-        if (Object.keys(ingredient).length) {
-            ingredients.push(ingredient);
-        }
+        // handles dividers
+        else if ($ingr.hasClass('ingr-div')) {
+            var ingrDiv = $ingr.find('input[name="ingrDiv"]').val()
+            if (ingrDiv) {
+                var divText = {
+                    'div': ingrDiv
+                }
+                ingredients.push(divText);
+            }
+        }     
     });
 
-    jsonMeal["ingrs"] = ingredients;
-    meal[id] = jsonMeal;
+    dictMeal["ingrs"] = ingredients;
+    meal[id] = dictMeal;
 
     return meal;
 }
 
 
+// saves a meal
 function saveMeal() {
-    const meal = mealToJson();
+    const meal = mealToDict();
     postMeal(meal, 'create');
 }
 
 
+// updates an existing meal
 function updateMeal() {
-    const meal = mealToJson();
+    const meal = mealToDict();
     postMeal(meal, 'update');
 }
 
 
+// deletes a meal
 function deleteMeal() {
-    const meal = mealToJson();
+    const meal = mealToDict();
     postMeal(meal, 'delete');
 }
 
 
+/**
+ * Updates the max id which is used to create a new meal. 
+ * This ensures ids are always unique client side
+ * @param {array} meals - Array of the meals which is used to calculate the max id 
+ */
 function updateMaxId(meals) {
     if (meals) {
         // get an array of the ids
@@ -231,7 +335,7 @@ function updateMaxId(meals) {
                 ids.push(id);
             }
         });
-        // convert the ids to ints and get the max
+        // convert the ids to ints and gets the max
         const maxId = Math.max(...ids);
         latestId = maxId + 1;
         $('#mealId').val(latestId);
@@ -242,6 +346,12 @@ function updateMaxId(meals) {
 }
 
 
+/**
+ * Is called when the app loads or after a meal is POSTed
+ * 1. Max ID is incremented
+ * 2. Datatable gets updated
+ * 3. Edit meal select gets updated
+ */
 function updateApp() {
     getMeals('all_meals')
     .then((resp) => {
@@ -252,6 +362,185 @@ function updateApp() {
 }
 
 
+/**
+ * Handles the maths to calulate the new ingredient quantities. This is down by comparing the
+ * quantities set in the hidden ingredients which represent the original serving size and the
+ * shown ingredients which represent the user adjusted serving size.
+ */
+function updateIngrQuantity() {
+    const $ingredientsHidden = $('#detailIngredients li.ingr-hidden:has(span.meal-view-quantity)');
+    const $ingredientsShown = $('#detailIngredients li.ingr-shown:has(span.meal-view-quantity)');
+    const ogServingSize = parseInt($('#ogServingSize').text());
+    const newServingSize = parseInt($('#servingInpt').val());
+    // this is used to calculate the new quantities
+    const percentChange = newServingSize / ogServingSize;
+    
+    $ingredientsHidden.each( (index, ingr) => {
+        const $ingr = $(ingr);
+        const $quantityHidden = $ingr.find('.meal-view-quantity');
+        // calculate the new quantity
+        const quantityVal = parseFloat($quantityHidden.text());
+        var newQuantity = Math.round(quantityVal * percentChange * 10) / 10;
+        // get the visible quantity value
+        const $quantityShown = $ingredientsShown.find('.meal-view-quantity').eq(index);
+        // makes the quantity a whole number if the decimal value on the float is 0 or it's larger than 50
+        if (newQuantity % 1 == 0 || newQuantity > 50) {
+            newQuantity = Math.round(newQuantity);
+        }
+        $quantityShown.text(newQuantity);
+    });
+}
+
+
+/**
+ * Populates the options for the edit a meal select
+ * @param {array} meals - array of the meals 
+ */
+function updateMealList(meals) {
+    var options = '';
+    meals.forEach(meal => {
+        const id = Object.keys(meal)[0];
+        options += `<option value="${id}">${meal[id]['name']}</option>`;
+    });
+    $('#editMeals option:enabled').remove();
+    $('#editMeals').append(options);
+}
+
+
+/**
+ * Gets a value from the meal object.
+ * @param {Object} meal - A dictionary of a single meal
+ * @param {string} key -A top level key that will be used with the meal to get a value
+ * @param {string} [timeKey] - Optional. If `key` is `time` then another key is needed to get the nested value
+ * @returns {string} - Returns the value requested using the supplied key(s)
+ */
+function getVal(meal, key, timeKey) {
+    if (meal && key && timeKey) {
+        if (meal.hasOwnProperty(key) && meal[key].hasOwnProperty(timeKey)) {
+            return meal[key][timeKey];
+        }
+    }
+    else {
+        return meal[key];
+    }
+}
+
+
+/**
+ * Gets a meal and populates the form with the data so that it can be edited.
+ * 1. Uses the data from the get request to populate the create a meal form
+ * 2. For each ingredient and divider an appropriate row is created
+ * 3. The buttons are changed 
+ */
+function editMeal() {
+    const id = $('#editMeals option:selected').val();
+    if (id) {
+        getMeals('a_meal', id)
+            .then((meals) => {
+                // set the values into the form
+                const meal = meals[id];
+                $('#mealId').val(id);
+                $('#mealName').val(meal['name']);
+                $('#region').val(getVal(meal, 'region'));
+                $('#course').val(getVal(meal, 'course'));
+                $('#serving').val(getVal(meal, 'serv'));
+                $('#totalTime').val(getVal(meal, 'time', 'len'));
+                $('#timeUnit').val(getVal(meal, 'time', 'unit'));
+                $('#description').val(getVal(meal, 'desc'));
+                // empty the ingredients and build the html for the ingredients
+                var $ingredients = $('#ingredients');
+                $ingredients.empty();
+                var html = '';                
+                
+                const ingrs = meal['ingrs'];
+                if (!ingrs.length) {    // if there aren't any ingredients just show an empty row
+                    html += ingrRow;
+                }
+                else {
+                    ingrs.forEach( (ingr) => {
+                        if (ingr.hasOwnProperty('name')) {  // ingredient row
+                            html += ingrRow;
+                        }
+                        else if (ingr.hasOwnProperty('div')) {  // divider row
+                            html += createIngrDiv();
+                        }
+                    });
+                }
+                
+                $ingredients.append(html);
+                // set the values for each row
+                if (ingrs.length) {
+                    $ingredients.find('div[class*="ingr-"]').each(function(index, row) {
+                        var ingr = ingrs[index];
+                        if ($(row).hasClass('ingr-row')) {  // ingredient row
+                            $(row).find('select[name="ingredient"]').val(ingr['name']).trigger('change');
+                            $(row).find('input[name="quantity"]').val(ingr['quant']);
+                            $(row).find('select[name="unit"]').val(ingr['unit']);
+                        }
+                        else if ($(row).hasClass('ingr-div')) { // ingredient div
+                            $(row).find('input[name="ingrDiv"]').val(ingr['div']);
+                        }
+                    });
+                }
+                $('#saveMealBtn').hide();
+                $('#updateMealBtn').show();
+                $('#deleteMealBtn').show();
+            });
+    }
+}
+
+
+/**
+ * Handles the drag and drop sorting functionality with the ingredients
+ * using the Sortable.js library
+ */
+const el = document.getElementById('ingredients');
+var sortable = Sortable.create(el);
+sortable.option('disabled', true);
+
+
+function enableSortMode() {
+    $('#enableSortBtn').hide();
+    $('#disableSortBtn').show();
+    sortable.option('disabled', false);
+    $('div[class*=ingr-]').addClass('sort-enabled');
+}
+
+
+function disableSortMode() {
+    $('#disableSortBtn').hide();
+    $('#enableSortBtn').show();
+    sortable.option('disabled', true);
+    $('div[class*=ingr-]').removeClass('sort-enabled');
+}
+
+
+/**
+ * Resets the create/edit meal form and updates the max meal id for use with the next meal.
+ */
+function resetForm() {
+    $('#createMealForm')[0].reset();
+    $('#ingredients').html(ingrRow);
+    $('#editMeals').val($('#editMeals option:first').val()).trigger('change');
+    $('#saveMealBtn').show();
+    $('#updateMealBtn').hide();
+    $('#deleteMealBtn').hide();
+    disableSortMode();
+    
+    getMeals('all_meals')
+        .then((resp) => {
+            updateMaxId(resp);
+        });
+}
+
+/* My Meals Section --------------------------- */ 
+
+
+/**
+ * Takes in a string and returns an emoji based on whether or not the string is empty.
+ * @param {string} val - a string that is either empty or it isn't 
+ * @returns {string} emoji - an icon based on if the val was true or false
+ */
 function prettyBool(val) {
     if (val) {
         return '✔️';
@@ -260,6 +549,7 @@ function prettyBool(val) {
         return '❌';
     }
 }
+
 
 // create the Datatable
 var table = $('#mealsTable').DataTable({
@@ -275,37 +565,60 @@ var table = $('#mealsTable').DataTable({
 });
 
 
-function updateTable(data) {
+/**
+ * Redraws the datatable using the latest array of meals. Hidden columns are included in the
+ * table which are then used to show a meal's details when a row is clicked on.
+ * @param {array} meals - Array of all the meals 
+ */
+function updateTable(meals) {
     table
         .clear()
         .draw();
       
-    var meals = [];
+    var mealRows = [];
     
-    data.forEach(meal => {
+    meals.forEach(meal => {
         const id = Object.keys(meal)[0];
         var ingredients = '';
-        // build the inrgedients
-        if (meal[id]['ingrs'].length) {
-            meal[id]['ingrs'].forEach((ingr, index) => {
+        // build the ingredients
+        var ingrs = meal[id]['ingrs'];
+        var ingrCount = ingrs.length;
+        
+        if (ingrCount) {
+            // builds the html for the ingredients and dividers
+            ingrs.forEach((ingr, index) => {
+                var isIngr = ingr.hasOwnProperty('name');
                 if (index === 0) {
-                    ingredients += '<ul>';
+                    if (isIngr) {
+                        ingredients += '<ul>';
+                    }
                 }
-                var quantity = '';
-                if (ingr['quant']) {
-                    var quantity = `<strong><span class="meal-view-quantity">${ingr['quant']}</strong> (${ingr['unit']})</span>`;
+                if (index !== 0) {
+                    if (ingrs[index-1].hasOwnProperty('div') && isIngr) {    // if the previous ingr was a div and this is a ingr
+                        ingredients += '<ul>';
+                    }
+                    else if (ingrs[index-1].hasOwnProperty('name') && !isIngr) { // if the previous ingr was a ingr and this is a div
+                        ingredients += '</ul>';
+                    }
+                }                    
+                if (isIngr) {
+                    var quantity = '';
+                    if (ingr['quant']) {
+                        var quantity = `<strong><span class="meal-view-quantity">${ingr['quant']}</strong> (${ingr['unit']})</span>`;
+                    }
+                    ingredients += `
+                        <li class="ingr-shown">${ingr['name']} <strong>${quantity}</strong></li>
+                        <li class="ingr-hidden" hidden>${ingr['name']} <strong>${quantity}</strong></li>
+                    `;
                 }
-                ingredients += `
-                    <li class="ingr-shown">${ingr['name']} <strong>${quantity}</strong></li>
-                    <li class="ingr-hidden" hidden>${ingr['name']} <strong>${quantity}</strong></li>
-                `;
+                else {
+                    ingredients += `<p class="ingr-div"><strong>${ingr['div']}</strong></p>`;
+                }
             });
-            ingredients += '</ul>';
         }
         else {
             ingredients += "<p>This meal doesn't have any ingredients so go add some MUPPET<p>";
         }
-
         // build the description
         if (meal[id]['desc']) {
             var desc = meal[id]['desc']
@@ -321,8 +634,8 @@ function updateTable(data) {
         else {
             var time = '-';
         }
-
-        mealArray = [
+        // The contents for each row in the table
+        const mealRow = [
             id,
             meal[id]['name'],
             meal[id]['region'],
@@ -333,10 +646,10 @@ function updateTable(data) {
             meal[id]['serv'],
             time
         ]
-        meals.push(mealArray);
+        mealRows.push(mealRow);
     });
     
-    table.rows.add(meals).draw();
+    table.rows.add(mealRows).draw();
     // when a row in the table is clicked show the meal details
     $('#mealsTable').on('click', 'tbody tr', function() {
         const data = table.row(this).data();
@@ -370,14 +683,20 @@ function updateTable(data) {
 }
 
 
-function mealToClipboard() {
-    
+/**
+ * Copies a meals details to the clip board. The method used is dependant
+ * on how the application has been hosted ie. if the domain has an SSL certificate.
+ */
+function mealToClipboard() {    
+    // build the text to copy to the clipboard
     var textToCopy = '';
     const name = $('#detailHeading h3').text();
     const serving = $('#servingInpt').val();
-    textToCopy = `${name}\n\nServing Size: ${serving}`;
-
-    const ingrs = $('#detailIngredients').find('li.ingr-shown');
+    textToCopy += `${name}\n\nServing Size: ${serving}`;
+    const mealTime = $('#mealTime').text();
+    textToCopy += `\n${mealTime}`;
+    // include the ingredients and description
+    const ingrs = $('#detailIngredients').find('li.ingr-shown, p');
     if (ingrs.length) {
         textToCopy += '\n\n';
         ingrs.each(function() {
@@ -386,7 +705,7 @@ function mealToClipboard() {
     }
     const description = $('#detailDescription p').text();
     textToCopy += '\n\n' + description;
-    
+    // copy the text into a hidden textarea and add it to the clipboard using deprecated method
     if (window.location.protocol == 'http:') {
         const clipboardInput = $('<textarea>');
         $('#detailDescription').after(clipboardInput);
@@ -395,6 +714,7 @@ function mealToClipboard() {
         document.execCommand("copy");
         clipboardInput.remove();
     }
+    // use the recomended api if the app is using a SSL certificate
     else {
         const clipboardText = async () => {
             try {
@@ -405,7 +725,7 @@ function mealToClipboard() {
             }
         }
     }
-    
+    // handles the copy button interaction
     const checkIcon = '<i class="bi bi-check2"></i>';
     const copyIcon = '<i class="bi bi-copy"></i>';
     const $copyBtn = $('#mealToClipboard button');
@@ -414,153 +734,4 @@ function mealToClipboard() {
     setTimeout(() => {
         $copyBtn.html(copyIcon);
     }, 1500);
-}
-
-
-function updateIngrQuantity() {
-    const $ingredientsHidden = $('#detailIngredients li.ingr-hidden:has(span.meal-view-quantity)');
-    const $ingredientsShown = $('#detailIngredients li.ingr-shown:has(span.meal-view-quantity)');
-    const ogServingSize = parseInt($('#ogServingSize').text());
-    const newServingSize = parseInt($('#servingInpt').val());
-    const percentChange = newServingSize / ogServingSize;
-    
-    $ingredientsHidden.each( (index, ingr) => {
-        const $ingr = $(ingr);
-        const $quantityHidden = $ingr.find('.meal-view-quantity');
-        // calculate the new quantity
-        const quantityVal = parseFloat($quantityHidden.text());
-        var newQuantity = Math.round(quantityVal * percentChange * 10) / 10;
-        // get the visible quantity value
-        const $quantityShown = $ingredientsShown.find('.meal-view-quantity').eq(index);
-        // makes the quantity an integer it's a whole number float or larger than 50
-        if (newQuantity % 1 == 0 || newQuantity > 50) {
-            newQuantity = Math.round(newQuantity);
-        }
-        $quantityShown.text(newQuantity);
-    });
-}
-
-
-function updateMealList(data) {
-    const meals = data;
-    var options = '';
-    meals.forEach(meal => {
-        const id = Object.keys(meal)[0];
-        options += `<option value="${id}">${meal[id]['name']}</option>`;
-    });
-    $('#editMeals option:enabled').remove();
-    $('#editMeals').append(options);
-}
-
-
-const el = document.getElementById('ingredients');
-var sortable = Sortable.create(el);
-sortable.option('disabled', true);
-
-
-function enableSortMode() {
-    $('#enableSortBtn').hide();
-    $('#disableSortBtn').show();
-    sortable.option('disabled', false);
-}
-
-
-function disableSortMode() {
-    $('#disableSortBtn').hide();
-    $('#enableSortBtn').show();
-    sortable.option('disabled', true);
-}
-
-
-function waitForElm(selector) {
-    return new Promise(resolve => {
-        if (document.querySelector(selector)) {
-            return resolve(document.querySelector(selector));
-        }
-        // disconnect when the observer detects the element
-        const observer = new MutationObserver(mutations => {
-            if (document.querySelector(selector)) {
-                observer.disconnect();
-                resolve(document.querySelector(selector));
-            }
-        });
-
-        observer.observe(document.body, {
-            childList: true,    // check for addition or removal of child nodes
-            subtree: true       // observe all descendants
-        });
-    });
-}
-
-function getVal() {
-    const obj = arguments[0];
-    const key1 = arguments[1];
-    if (arguments.length > 2) {
-        var key2 = arguments[2];
-        if (obj.hasOwnProperty(key1) && obj[key1].hasOwnProperty(key2)) {
-            return obj[key1][key2];
-        }
-    }
-    else {
-        return obj[key1];
-    }
-}
-
-
-function editMeal() {
-    // gets a meal and populates the form with the data so that it can be edited
-    const id = $('#editMeals option:selected').val();
-    if (id) {   // if the form isn't being reset
-        getMeals('a_meal', id)
-            .then((resp) => {
-                const meal = resp[id];
-                $('#mealId').val(id);
-                $('#mealName').val(meal['name']);
-                $('#region').val(getVal(meal, 'region'));
-                $('#course').val(getVal(meal, 'course'));
-                $('#serving').val(getVal(meal, 'serv'));
-                $('#totalTime').val(getVal(meal, 'time', 'len'));
-                $('#timeUnit').val(getVal(meal, 'time', 'unit'));
-                $('#description').val(getVal(meal, 'desc'));
-                // get the number of ingredients
-                if (meal['ingrs'].length) {
-                    var ingr_count = meal['ingrs'].length;
-                }
-                else {
-                    var ingr_count = 1;
-                }
-                $('#ingredients').empty();
-                addNewIngredient(ingr_count);
-                
-                meal['ingrs'].forEach((ingr, index) => {
-                    // wait for the element to exist before setting the values
-                    waitForElm(`#ingrRow-${index+1}`).then((ingrRow) => {
-                        $(ingrRow).find('select[name=ingredient]').val(ingr['name']).trigger('change');
-                        $(ingrRow).find('input[name=quantity]').val(ingr['quant']);
-                        $(ingrRow).find('select[name=unit]').val(ingr['unit']);
-                    });
-                });
-
-                $('#saveMealBtn').hide();
-                $('#updateMealBtn').show();
-                $('#deleteMealBtn').show();
-            });
-    }
-}
-
-
-function resetForm() {
-    $('#createMealForm')[0].reset();
-    $('#ingredients').empty();
-    addNewIngredient(1);
-    $('#editMeals').val($('#editMeals option:first').val()).trigger('change');
-    $('#saveMealBtn').show();
-    $('#updateMealBtn').hide();
-    $('#deleteMealBtn').hide();
-    disableSortMode();
-    
-    getMeals('all_meals')
-        .then((resp) => {
-            updateMaxId(resp);
-        });
 }

@@ -102,6 +102,15 @@ textarea {
     white-space: pre-line;
 }
 
+.sort-enabled {
+    cursor: grab;
+}
+
+.sort-enabled:active {
+    cursor: grabbing;
+}
+
+
 /* SELECT2 */
 
 .select2-selection__arrow {
