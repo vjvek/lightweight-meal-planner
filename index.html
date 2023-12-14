@@ -160,26 +160,26 @@
                                             </div>
                                         </div>
                                         <hr>
-                                        <div class="row d-flex justify-content-between">
+                                        <div class="row d-flex justify-content-between py-2">
                                             <div class="col-auto">
                                                 <h4>Ingredients</h4>
                                                 <p></p>
                                             </div>
                                             <div class="col-auto">
-                                                <button type="button" class="btn btn-primary" title="Add Another Ingredient" onclick="addNewIngr()"><i class="bi bi-plus-lg"></i></button>
-                                                <button type="button" class="btn btn-primary" title="Add an Ingredient Divider" onclick="addIngrDiv()"><i class="bi bi-hr"></i></button>
-                                                <button type="button" id="enableSortBtn" class="btn btn-secondary" title="Enable Sort Mode" onclick="enableSortMode()"><i class="bi bi-arrow-down-up"></i></button>
-                                                <button type="button" id="disableSortBtn" class="btn btn-secondary" title="Disable Sort Mode" onclick="disableSortMode()" style="display: none;"><i class="bi bi-list-ul"></i></button>
-                                                <button type="button" id="dltIngrBtn" class="btn btn-danger" title="Delete Selected" onclick="deleteIngredient()" disabled><i class="bi bi-trash"></i></button>
+                                                <button type="button" class="btn-main me-2" title="Add Another Ingredient" onclick="addNewIngr()"><i class="bi bi-plus-lg"></i></button>
+                                                <button type="button" class="btn-main me-2" title="Add an Ingredient Divider" onclick="addIngrDiv()"><i class="bi bi-hr"></i></button>
+                                                <button type="button" id="enableSortBtn" class="btn-third me-2" title="Enable Sort Mode" onclick="enableSortMode()"><i class="bi bi-arrow-down-up"></i></button>
+                                                <button type="button" id="disableSortBtn" class="btn-third me-2" title="Disable Sort Mode" onclick="disableSortMode()" style="display: none;"><i class="bi bi-list-ul"></i></button>
+                                                <button type="button" id="dltIngrBtn" class="btn-second" title="Delete Selected" onclick="deleteIngredient()" disabled><i class="bi bi-trash"></i></button>
                                             </div>
                                         </div>
                                         <div id="ingredients"></div>
                                         <hr>
                                         <div id="formBtns">
-                                            <button type="button" id="saveMealBtn" class="btn btn-primary" onclick="saveMeal()" disabled>Save Meal</button>
-                                            <button type="button" id="updateMealBtn"class="btn btn-primary" onclick="updateMeal()" style="display: none;">Update Meal</button>
-                                            <button type="button" id="deleteMealBtn"class="btn btn-danger" onclick="deleteMeal()" style="display: none;">Delete Meal</button>
-                                            <button type="button" class="btn btn-warning" onclick="resetForm()" disabled>Reset Form</button>
+                                            <button type="button" id="saveMealBtn" class="btn-main me-2" onclick="saveMeal()" disabled>Save Meal</button>
+                                            <button type="button" id="updateMealBtn"class="btn-main me-2" onclick="updateMeal()" style="display: none;">Update Meal</button>
+                                            <button type="button" id="deleteMealBtn"class="btn-second me-2" onclick="deleteMeal()" style="display: none;">Delete Meal</button>
+                                            <button type="button" id="resetFormBtn" class="btn-third" onclick="resetForm()" disabled>Reset Form</button>
                                         </div>
                                     </div>
                                 </form>

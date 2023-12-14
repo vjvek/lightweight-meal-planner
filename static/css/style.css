@@ -19,6 +19,7 @@ body, div.container {
 h1 {
     font-family: 'Indie Flower', cursive;
     font-size: 3.5em;
+    color: #6b2737;
 }
 
 #navbar {
@@ -26,7 +27,15 @@ h1 {
 }
 
 .nav-link {
-    color: #2e1acd;
+    color: #3943b7;
+}
+
+.nav-link:hover {
+    color: #636edd;
+}
+
+.nav-underline .nav-link.active, .nav-underline .show>.nav-link {
+    color: #6b2737;
 }
 
 h3 {
@@ -96,10 +105,50 @@ textarea {
     height: 180px;
     min-height: 226px;
     padding: 5px 10px 5px 10px;
+    display: block;
+    overflow: hidden;
+    resize: none;
 }
 
 #detailDescription {
     white-space: pre-line;
+}
+
+/* buttons */
+
+button {
+    border-radius: 7px;
+    padding: 4px 9px;
+    background-color: rgb(255 250 211); 
+    transition-duration: 200ms;
+}
+
+.btn-main {
+    --btn-color: #3943b7;
+    border: 6px solid var(--btn-color);
+    box-shadow: 2px 2px 0 0 white, 4px 4px 0 0 var(--btn-color);
+}
+
+.btn-second {
+    --btn-color: #6b2737;
+    border: 6px solid var(--btn-color);
+    box-shadow: 2px 2px 0 0 white, 4px 4px 0 0 var(--btn-color);
+}
+
+.btn-third {
+    --btn-color: #E08e45;
+    border: 6px solid var(--btn-color);
+    box-shadow: 2px 2px 0 0 white, 4px 4px 0 0 var(--btn-color);
+}
+
+button:not(:disabled):hover {
+    box-shadow: 3px 3px white, 6px 6px 0 0 var(--btn-color);
+    transform: translate(-2px, -2px);
+}
+
+button:not(:disabled):active {
+    box-shadow: 0px 0px white, 0px 0px 0 0 var(--btn-color);
+    transform: translate(2px, 2px);
 }
 
 .sort-enabled {
@@ -109,7 +158,6 @@ textarea {
 .sort-enabled:active {
     cursor: grabbing;
 }
-
 
 /* SELECT2 */
 
@@ -124,7 +172,6 @@ textarea {
 }
 
 .select2-search input {
-    color: var(--input-bg-color) !important;
     background-color: var(--input-bg-color) !important;
 }
 

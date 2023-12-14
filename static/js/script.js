@@ -1,4 +1,10 @@
+// Initial app setup
 var latestId = 1;
+
+$('textarea').on('input change', function() {
+    this.style.height = 'auto';
+    this.style.height = (this.scrollHeight) + 'px';
+});
 
 observerSelect2();
 addNewIngr();
@@ -447,6 +453,7 @@ function editMeal() {
                 $('#totalTime').val(getVal(meal, 'time', 'len'));
                 $('#timeUnit').val(getVal(meal, 'time', 'unit'));
                 $('#description').val(getVal(meal, 'desc'));
+                $('#description').trigger('change');
                 // empty the ingredients and build the html for the ingredients
                 var $ingredients = $('#ingredients');
                 $ingredients.empty();
@@ -522,6 +529,7 @@ function resetForm() {
     $('#createMealForm')[0].reset();
     $('#ingredients').html(ingrRow);
     $('#editMeals').val($('#editMeals option:first').val()).trigger('change');
+    $('#description').trigger('change');
     $('#saveMealBtn').show();
     $('#updateMealBtn').hide();
     $('#deleteMealBtn').hide();
@@ -561,7 +569,8 @@ var table = $('#mealsTable').DataTable({
         { target: 6, visible: false },
         { target: 7, visible: false },
     ],
-    order: [[1, 'asc']] // order by name
+    order: [[1, 'asc']], // order by name
+    select: true
 });
 
 
@@ -653,6 +662,7 @@ function updateTable(meals) {
     // when a row in the table is clicked show the meal details
     $('#mealsTable').on('click', 'tbody tr', function() {
         const data = table.row(this).data();
+        id = data[0]; // used in the jumptToEdit function
         const name = data[1];
         const serving = data[7];
         const ingredients = data[5];
@@ -671,11 +681,14 @@ function updateTable(meals) {
         }
         
         const header = `<h3>${name}</h3>${servingHtml}` + servingInpt;
-        const copyBtn = '<button type="button" class="btn btn-primary" onclick="mealToClipboard()"><i class="bi bi-copy"></i></button>'
+        const btns = `
+            <button id="copyBtn" type="button" class="btn-main me-3" onclick="mealToClipboard()"><i class="bi bi-copy"></i></button>
+            <button type="button" class="btn-second" onclick="jumpToEdit()"><i class="bi bi-pencil-fill"></i></button>
+        `;
         const description = data[6];
         const mealTime = `<p>⏰ ${data[8]}</p>`;
         $('#detailHeading').html(header);
-        $('#mealToClipboard').html(copyBtn);
+        $('#mealToClipboard').html(btns);
         $('#mealTime').html(mealTime);
         $('#detailIngredients').html(ingredients);
         $('#detailDescription').html(description);
@@ -728,10 +741,29 @@ function mealToClipboard() {
     // handles the copy button interaction
     const checkIcon = '<i class="bi bi-check2"></i>';
     const copyIcon = '<i class="bi bi-copy"></i>';
-    const $copyBtn = $('#mealToClipboard button');
+    const $copyBtn = $('#copyBtn');
     $copyBtn.html(checkIcon);
     
     setTimeout(() => {
         $copyBtn.html(copyIcon);
     }, 1500);
+}
+
+const triggerTabList = document.querySelectorAll('#navbar a')
+triggerTabList.forEach(triggerEl => {
+    const tabTrigger = new bootstrap.Tab(triggerEl);
+
+    triggerEl.addEventListener('click', event => {
+        event.preventDefault();
+        tabTrigger.show();
+    });
+});
+
+
+function jumpToEdit() {
+    const triggerEl = document.querySelector('#navbar a[href="#createMeal"]');
+    bootstrap.Tab.getInstance(triggerEl).show();
+
+    $('#editMeals').val(id);
+    $('#editMeals').trigger('change');
 }
