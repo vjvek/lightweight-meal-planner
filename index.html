@@ -32,23 +32,23 @@
                 <div id="navbar" class="col py-3">
                     <ul class="nav nav-underline justify-content-center" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" data-bs-toggle="tab" href="#mealViewer">My Meals</a>
+                            <a class="nav-link active" data-bs-toggle="tab" href="#mealViewerTab">My Meals</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#mealplanner">Meal Planner</a>
+                            <a class="nav-link" data-bs-toggle="tab" href="#mealPlannerTab">Meal Planner</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#createMeal">Create a Meal</a>
+                            <a class="nav-link" data-bs-toggle="tab" href="#createMealTab">Create a Meal</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#createMealPlan">Create a Meal Plan</a>
+                            <a class="nav-link" data-bs-toggle="tab" href="#createMealPlanTab">Create a Meal Plan</a>
                         </li>
                     </ul>
                 </div>
             </div>
             <div class="tab-content">
                 <!-- View Meals -->
-                <div id="mealViewer" class="container tab-pane active"><br>
+                <div id="mealViewerTab" class="container tab-pane active"><br>
                     <h3>My Meals</h3>
                     <p>All your meals are shown here. You can search across all of them to find what you're looking for. Select one to see full details.</p>
                     <div class="row">
@@ -97,99 +97,146 @@
                     </div>
                 </div>
                 <!-- Meal Planner -->
-                <div id="mealplanner" class="container tab-pane fade"><br>
+                <div id="mealPlannerTab" class="container tab-pane fade"><br>
                     <h3>Meal Planner</h3>
                 </div>
                 <!-- Create/Edit a Meal -->
-                    <div id="createMeal" class="container tab-pane fade"><br>
-                        <div class="row">
-                            <div class="col">
-                                <h3>Create a Meal</h3>
-                                <p>Create a meal or edit an existing one using the dropdown list below.</p>
-                                <p>When creating a new meal, only the name is required. Everything else is optional. The meal creator provides you with the following features to help you get the most out of your meals:</p>
-                                <ul>
-                                    <li>Adding quantities to your ingredients allows you to dynamically recalculate them based on your chosen serving size</li>
-                                    <li>A sorting button to reorder ingredients</li>
-                                    <li>Create dividers to split up your ingredients into sections</li>
-                                </ul>
-                            </div>
+                <div id="createMealTab" class="container tab-pane fade"><br>
+                    <div class="row">
+                        <div class="col">
+                            <h3>Create a Meal</h3>
+                            <p>Create a meal or edit an existing one using the dropdown list below.</p>
+                            <p>When creating a new meal, only the name is required. Everything else is optional. The meal creator provides you with the following features to help you get the most out of your meals:</p>
+                            <ul>
+                                <li>Adding quantities to your ingredients allows you to dynamically recalculate them based on your chosen serving size</li>
+                                <li>A sorting button to reorder ingredients</li>
+                                <li>Create dividers to split up your ingredients into sections</li>
+                            </ul>
                         </div>
-                        <hr>
-                        <div class="row">
-                            <div class="col-sm-12 col-md-6 col-lg-4">
-                                <select name="editMeals" id="editMeals" class="form-select" onchange="editMeal()">
-                                    <option value="" disabled selected>Edit a Meal</option>
-                                </select>
-                            </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6 col-lg-4">
+                            <select name="editMeals" id="editMeals" class="form-select" onchange="editMeal()">
+                                <option value="" disabled selected>Edit a Meal</option>
+                            </select>
                         </div>
-                        <hr>
-                        <div class="row">
-                            <div class="col">
-                                <form id="createMealForm">
-                                    <div class="form-group">
-                                        <div class="row">
-                                            <div class="col-sm-12 col-md-6 col-lg-4">
-                                                <input type="hidden" id="mealId" name="mealId">
-                                                <input type="text" id="mealName" class="form-control" name="name" placeholder="Meal Name" required>
-                                                <input type="text" id="region" class="form-control" name="region" placeholder="Region" disabled>
-                                                <select id="course" class="form-select" name="course" disabled>
-                                                    <option value="" disabled selected>Course</option>
-                                                    <option value="starter">Starter</option>
-                                                    <option value="main">Main</option>
-                                                    <option value="dessert">Dessert</option>
-                                                    <option value="condiment">Condiment</option>
-                                                    <option value="other">Other</option>
-                                                </select>
-                                                <input type="number" id="serving" class="form-control" name="serving" placeholder="Serving Size" disabled></input>
-                                                <div class="row">
-                                                    <div class="col">
-                                                        <input type="number" id="totalTime" class="form-control" name="totalTime" placeholder="Total Time" disabled></input>
-                                                    </div>
-                                                    <div class="col">
-                                                        <select name="timeUnit" id="timeUnit" class="form-select" disabled>
-                                                            <option value="" disabled selected>Unit</option>
-                                                            <option value="mins">Minutes</option>
-                                                            <option value="hours">Hours</option>
-                                                            <option value="days">Days</option>
-                                                        </select>
-                                                    </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col">
+                            <form id="createMealForm">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-6 col-lg-4">
+                                            <input type="hidden" id="mealId" name="mealId">
+                                            <input type="text" id="mealName" class="form-control" name="name" placeholder="Meal Name" required>
+                                            <input type="text" id="region" class="form-control" name="region" placeholder="Region" disabled>
+                                            <select id="course" class="form-select" name="course" disabled>
+                                                <option value="" disabled selected>Course</option>
+                                                <option value="starter">Starter</option>
+                                                <option value="main">Main</option>
+                                                <option value="dessert">Dessert</option>
+                                                <option value="condiment">Condiment</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                            <input type="number" id="serving" class="form-control" name="serving" min="0" placeholder="Serving Size" disabled></input>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <input type="number" id="totalTime" class="form-control" name="totalTime" placeholder="Total Time" disabled></input>
+                                                </div>
+                                                <div class="col">
+                                                    <select name="timeUnit" id="timeUnit" class="form-select" disabled>
+                                                        <option value="" disabled selected>Unit</option>
+                                                        <option value="mins">Minutes</option>
+                                                        <option value="hours">Hours</option>
+                                                        <option value="days">Days</option>
+                                                    </select>
                                                 </div>
                                             </div>
-                                            <div class="col-sm-12 col-md-6 col-lg-8">
-                                                <textarea id="description" name="description" placeholder="Add a description here eg. the recipe steps" disabled></textarea>
-                                            </div>
                                         </div>
-                                        <hr>
-                                        <div class="row d-flex justify-content-between py-2">
-                                            <div class="col-auto">
-                                                <h4>Ingredients</h4>
-                                                <p></p>
-                                            </div>
-                                            <div class="col-auto">
-                                                <button type="button" class="btn-main me-2" title="Add Another Ingredient" onclick="addNewIngr()"><i class="bi bi-plus-lg"></i></button>
-                                                <button type="button" class="btn-main me-2" title="Add an Ingredient Divider" onclick="addIngrDiv()"><i class="bi bi-hr"></i></button>
-                                                <button type="button" id="enableSortBtn" class="btn-third me-2" title="Enable Sort Mode" onclick="enableSortMode()"><i class="bi bi-arrow-down-up"></i></button>
-                                                <button type="button" id="disableSortBtn" class="btn-third me-2" title="Disable Sort Mode" onclick="disableSortMode()" style="display: none;"><i class="bi bi-list-ul"></i></button>
-                                                <button type="button" id="dltIngrBtn" class="btn-second" title="Delete Selected" onclick="deleteIngredient()" disabled><i class="bi bi-trash"></i></button>
-                                            </div>
-                                        </div>
-                                        <div id="ingredients"></div>
-                                        <hr>
-                                        <div id="formBtns">
-                                            <button type="button" id="saveMealBtn" class="btn-main me-2" onclick="saveMeal()" disabled>Save Meal</button>
-                                            <button type="button" id="updateMealBtn"class="btn-main me-2" onclick="updateMeal()" style="display: none;">Update Meal</button>
-                                            <button type="button" id="deleteMealBtn"class="btn-second me-2" onclick="deleteMeal()" style="display: none;">Delete Meal</button>
-                                            <button type="button" id="resetFormBtn" class="btn-third" onclick="resetForm()" disabled>Reset Form</button>
+                                        <div class="col-sm-12 col-md-6 col-lg-8">
+                                            <textarea id="description" name="description" placeholder="Add a description here eg. the recipe steps" disabled></textarea>
                                         </div>
                                     </div>
-                                </form>
-                            </div>
+                                    <hr>
+                                    <div class="row d-flex justify-content-between py-2">
+                                        <div class="col-auto">
+                                            <h4>Ingredients</h4>
+                                            <p></p>
+                                        </div>
+                                        <div class="col-auto">
+                                            <button type="button" class="btn-main me-2" title="Add Another Ingredient" onclick="addNewIngr()"><i class="bi bi-plus-lg"></i></button>
+                                            <button type="button" class="btn-main me-2" title="Add an Ingredient Divider" onclick="addIngrDiv()"><i class="bi bi-hr"></i></button>
+                                            <button type="button" id="enableSortBtn" class="btn-second me-2" title="Enable Sort Mode" onclick="enableSortMode()"><i class="bi bi-arrow-down-up"></i></button>
+                                            <button type="button" id="disableSortBtn" class="btn-second me-2" title="Disable Sort Mode" onclick="disableSortMode()" style="display: none;"><i class="bi bi-list-ul"></i></button>
+                                            <!-- <button type="button" id="dltIngrBtn" class="btn-second" title="Delete Selected" onclick="deleteIngredient()" disabled><i class="bi bi-trash"></i></button> -->
+                                        </div>
+                                    </div>
+                                    <div id="ingredients"></div>
+                                    <hr>
+                                    <div id="formBtns">
+                                        <button type="button" id="saveMealBtn" class="btn-main me-2" onclick="saveMeal()" disabled>Save Meal</button>
+                                        <button type="button" id="updateMealBtn"class="btn-main me-2" onclick="updateMeal()" style="display: none;">Update Meal</button>
+                                        <button type="button" id="deleteMealBtn"class="btn-second me-2" onclick="deleteMeal()" style="display: none;">Delete Meal</button>
+                                        <button type="button" id="resetFormBtn" class="btn-third" onclick="resetForm()" disabled>Reset Form</button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
                 <!-- Create Meal Plan -->
-                <div id="createMealPlan" class="container tab-pane fade"><br>
-                    <h3>Create a Meal Plan</h3>
+                <div id="createMealPlanTab" class="container tab-pane fade"><br>
+                    <div class="row">
+                        <div class="col">
+                            <h3>Create a Meal Plan</h3>
+                            <p>You can create and edit your plan here. To add a meal you just need to click the add button and fill in the details.</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col d-flex justify-content-end">
+                            <button type="button" class="btn-main me-2" title="Add Another Ingredient" onclick="addNewMealRow()"><i class="bi bi-plus-lg" ></i></button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <form id="createPlanForm">
+                                <div class="form-group">
+                                    <div class="plan-list">
+                                        <div class="row d-flex plan-row mb-3">
+                                            <div class="col-auto">
+                                                <button type="button" class="btn-third dlt-plan" onclick="deletePlan(this)"><i class="bi bi-trash"></i></button>
+                                            </div>
+                                            <div class="col-sm-12 col-md-6 col-lg-4">
+                                                <input type="date" class="form-control meal-date">
+                                                <select class="form-select meal-name">
+                                                    <option value="" disabled selected>Choose Your Meal</option>
+                                                </select>
+                                                <select class="form-select meal-type">
+                                                    <option value="" disabled selected>What meal is this?</option>
+                                                    <option value="breakfast">Breakfast</option>
+                                                    <option value="brunch">Brunch</option>
+                                                    <option value="lunch">Lunch</option>
+                                                    <option value="linner">Linner</option>
+                                                    <option value="dinner">Dinner</option>
+                                                </select>
+                                                <input type="number" class="form-control meal-serving" min="1" placeholder="Serving Size"></input>
+                                            </div>
+                                            <div class="flex-grow-1 col-sm-12 col-md-auto col-lg-auto">
+                                                <textarea class="meal-note" placeholder="Add a note here"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div>
+                                        <button type="button" id="savePlanBtn" class="btn-main me-2" onclick="savePlan()">Save Plan</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>                        
+                    </div>
                 </div>                
             </div>
         </div>

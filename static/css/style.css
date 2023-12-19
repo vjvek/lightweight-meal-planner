@@ -27,15 +27,15 @@ h1 {
 }
 
 .nav-link {
-    color: #3943b7;
+    border-bottom: 4px solid #3943b7;
 }
 
 .nav-link:hover {
-    color: #636edd;
+    border-bottom: 4px solid #636edd;
 }
 
 .nav-underline .nav-link.active, .nav-underline .show>.nav-link {
-    color: #6b2737;
+    border-bottom: 4px solid #6b2737;    
 }
 
 h3 {
@@ -50,8 +50,8 @@ hr {
 
 /* for mobile screens */
 @media screen and (max-width: 768px) {
-    input[name="quantity"] {
-        margin-top: 10px;
+    input[name="quantity"], input[name="unit"], .dlt-ingr{
+        margin: 10px 0px 10px 0px !important;
     }
 }
 
@@ -67,6 +67,10 @@ hr {
 
 input, select, button {
     margin-bottom: 10px;
+}
+
+.ingr-row input, .ingr-row select, .ingr-row button {
+    margin-bottom: 0px;
 }
 
 input:not([type="checkbox"]), select, textarea {
@@ -100,10 +104,31 @@ input:not([type="checkbox"]):disabled::placeholder, select:disabled, textarea:di
     height: 37.33px !important;
 }
 
-textarea {
+#createMealForm textarea {
     width: 100%;
     height: 180px;
     min-height: 226px;
+    padding: 5px 10px 5px 10px;
+    display: block;
+    overflow: hidden;
+    resize: none;
+}
+
+
+#createMealForm textarea {
+    width: 100%;
+    height: 180px;
+    min-height: 226px;
+    padding: 5px 10px 5px 10px;
+    display: block;
+    overflow: hidden;
+    resize: none;
+}
+
+#createMealPlanTab textarea {
+    width: 100%;
+    height: 180px;
+    min-height: 179px;
     padding: 5px 10px 5px 10px;
     display: block;
     overflow: hidden;
@@ -114,6 +139,8 @@ textarea {
     white-space: pre-line;
 }
 
+
+
 /* buttons */
 
 button {
@@ -121,6 +148,10 @@ button {
     padding: 4px 9px;
     background-color: rgb(255 250 211); 
     transition-duration: 200ms;
+}
+
+button.dlt-ingr, button.dlt-plan {
+    padding: 0px 4px 0px 4px;
 }
 
 .btn-main {
