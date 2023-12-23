@@ -20,14 +20,17 @@ setTimeout(() => {
 }, 500);
 
 setTimeout(() => {
-    showPlan();
+    getPlan().then((plan) => {
+        showPlan(plan);
+        updatePlanList(plan);
+    });
 }, 500)
 
 $('#editMeals').select2({ width: '100%' });
 
 // handles disabling of the inputs in the create a meal section
 var $initInputs = $('#editMeals, #mealName');
-var $otherInputs = $('#createMeal :input:not(#editMeals, #mealName, #dltIngrBtn)')
+var $otherInputs = $('#createMealForm :input:not(#editMeals, #mealName, #dltIngrBtn)');
 
 $initInputs.on('change', () => {
     const editMeal = $('#editMeals').val();
@@ -47,7 +50,8 @@ $initInputs.on('change', () => {
  */
 function observerSelect2() {
     // create a mutation observer that watches #ingredients
-    const targetNode = document.getElementById("ingredients");
+    const targetNode1 = document.getElementById("ingredients");
+    const targetNode2 = document.getElementById("createPlanForm");
     // options for the observer (which mutations to observe)
     const config = { childList: true, subtree: true };
     // callback function to execute when mutations are observed
@@ -57,9 +61,16 @@ function observerSelect2() {
                 // apply select2 to the ingredients rows
                 const $newNode = $(mutation.addedNodes[1])
                 isNewIngr = $newNode.hasClass('ingr-row') || $newNode.hasClass('ingr-div');
+                isNewPlan = $newNode.hasClass('plan-row');
+
                 if (isNewIngr) {
                     setTimeout(() => {
                         $('.ingr-select').select2({ width: '100%' });
+                    }, 500);
+                }
+                if (isNewPlan) {
+                    setTimeout(() => {
+                        $('.meal-name').select2({ width: '100%' });
                     }, 500);
                 }
             }
@@ -68,7 +79,8 @@ function observerSelect2() {
     // create an observer instance linked to the callback function
     const observer = new MutationObserver(callback);
     // start observing the target node for configured mutations
-    observer.observe(targetNode, config);
+    observer.observe(targetNode1, config);
+    observer.observe(targetNode2, config);
 }
 
 
@@ -133,7 +145,7 @@ function addNewIngr() {
                         <option value="cups">Cups</option>
                         <option value="whole">Whole</option>
                         <option value="sprigs">Sprigs</option>
-                        <option value="Sticks">Sticks</option>
+                        <option value="sticks">Sticks</option>
                     </select>
                 </div>
             </div>`;
@@ -150,7 +162,7 @@ function addNewIngr() {
  */
 function createIngrDiv() {
     const div = `
-        <div class="row d-flex align-items-center ps-3 ingr-div">
+        <div class="row d-flex align-items-center ingr-div">
             <div class="col-auto">
                 <button type="button" class="btn-third dlt-ingr" title="Delete This Row" onclick="deleteIngredient(this)"><i class="bi bi-trash"></i></button>
             </div>
@@ -408,8 +420,16 @@ function updateMealList(meals) {
         options += `<option value="${id}">${meal[id]['name']}</option>`;
     });
     // remove all the options and set the updated ones
-    $('#editMeals option:enabled, .meal-name option:enabled').remove();
-    $('#editMeals, .meal-name').append(options);
+    $('#editMeals option:enabled').remove();
+    $('#editMeals').append(options);
+    // do the same for the meal plan forms
+    $('#createPlanForm .meal-name').each(function() {
+        const $mealSelect = $(this);
+        const val = $mealSelect.val();
+        $mealSelect.find('option:enabled').remove();
+        $mealSelect.append(options);
+        $mealSelect.val(val).trigger('change');
+    });
 }
 
 
@@ -550,31 +570,33 @@ function resetForm() {
 // set the min date to today
 var today = new Date;
 today = today.toISOString().split('T', 10)[0];
-$('#createMealPlan input[type="date"]').attr('min', today);
+$('#createPlanForm input[type="date"]').attr('min', today);
 
 
 function planToJson() {
     const $formData = $('#createPlanForm');
     const $mealRows = $formData.find('.plan-row');
-    console.log($mealRows)
-    // get the number of meals
-    // iterate through and build the dict and append to an array
-    // ajax back to sbumit.php
     const plan = [];
 
     $mealRows.each(function() {
         const $this = $(this);
+        var mealId = $this.find('.meal-name').val();
+        var mealName = $this.find('.meal-name').find(':selected').text();
+        if (!mealId) {
+            mealId = '';
+            mealName = '';
+        }
         const dictPlan = {
             'date': $this.find('.meal-date').val(),
-            'meal_id': $this.find('.meal-name').val(),
-            'meal_name': $this.find('.meal-name').find(':selected').text(),
+            'meal_id': mealId,
+            'meal_name': mealName,
             'meal_type': $this.find('.meal-type').val(),
             'serv': $this.find('.meal-serving').val(),
             'note': $this.find('.meal-note').val()
         };
         plan.push(dictPlan);
     });
-    
+
     return plan;
 }
 
@@ -587,6 +609,7 @@ function addNewMealRow() {
 function savePlan() {
     const plan = planToJson();
     postPlan(plan);
+    updatePlanList(plan);
 }
 
 
@@ -606,7 +629,6 @@ function postPlan(plan) {
         setTimeout(() => {
             $saveBtn.text('Save Plan');
         }, 2000);
-
     });
     request.fail(() => {
         console.log('failed to post plan!');
@@ -632,22 +654,20 @@ function getPlan() {
 }
 
 
-function showPlan() {
-    getPlan()
-        .then((mealPlan) => {
-            // iterate through length of plan and create rows for each one
-            var $planDiv = $('.plan-list');
-            $planDiv.empty();
-            mealPlan.forEach((plan) => {
-                $planDiv.append(mealRow);
-                const $newRow = $('.plan-row').last();
-                $newRow.find('.meal-date').val(plan['date']);
-                $newRow.find('.meal-name').val(plan['meal']).trigger('change');
-                $newRow.find('.meal-type').val(plan['meal_type']);
-                $newRow.find('.meal-serving').val(plan['serv']);
-                $newRow.find('textarea').val(plan['note']);
-            });
-        });
+function showPlan(plan) {
+        // iterate through length of plan and create rows for each one
+    var $planDiv = $('.plan-list');
+    $planDiv.empty();
+    plan.forEach((plan) => {
+        $planDiv.append(mealRow);
+        const $newRow = $('.plan-row').last();
+        $newRow.find('.meal-date').val(plan['date']);
+        $newRow.find('.meal-name').val(plan['meal_id']).trigger('change');
+        $newRow.find('.meal-type').val(plan['meal_type']);
+        $newRow.find('.meal-serving').val(plan['serv']);
+        $newRow.find('textarea').val(plan['note']);
+    });
+    $('.meal-name').select2({ width: '100%' });
 }
 
 
@@ -658,23 +678,95 @@ function deletePlan(btn) {
 
 /* My Meal Plan Section ----------------------- */
 
-
-getPlan()
-    .then((plan) => {
-        plan.sort((a, b) => new Date(a['date']) - new Date(b['date']));
-        plan.sort((a, b) => {
-            const rating = {
-                'breakfast': 1,
-                'brunch': 2,
-                'lunch': 3,
-                'linner': 4,
-                'dinner': 5,
+function updatePlanList(plan) {
+    const $plan = $('#mealPlannerList');
+    $plan.empty();
+    plan.sort((a, b) => new Date(a['date']) - new Date(b['date']));
+    plan.sort((a, b) => {
+        const rating = {
+            'breakfast': 1,
+            'brunch': 2,
+            'lunch': 3,
+            'linner': 4,
+            'dinner': 5,
+        }
+        return rating[a['meal_type']] - rating[b['meal_type']];         
+    });
+    const dates = [...new Set(plan.map(meal => meal['date']))];
+    
+    var html = '';
+    dates.forEach((date) => {
+        const dailyPlan = plan.filter(meal => meal['date'] === date);
+        var cards = '';
+        dailyPlan.forEach((meal) => {
+            var id = '';
+            var cardClass = '';
+            var serving = '';
+            if (meal['meal_name']) {
+                id = `id="card-${meal['meal_id']}"`;
+                cardClass = 'saved-meal'
             }
-            return rating[a['meal_type']] - rating[b['meal_type']];         
+            const name = meal['meal_name'] || 'See notes';
+            const note = meal['note'] || 'This meal has no notes';
+            if (meal['serv']) {
+                serving = `for ${meal['serv']}`; 
+            }
+            cards += `                    
+                <div class="col-sm-12 col-md-4 col-lg-3">
+                    <div ${id} class="card mb-2">
+                        <div class="card-header ${cardClass}">
+                            <h5 class="card-title">${name}</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-body-secondary font-small">${meal['meal_type']} ${serving}</h6>
+                            <p class="card-text">${note}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
         });
 
         
+        
+        const mealsInDay = `
+            <div class="row mb-3">
+                <h5 class="mb-3">${formatDate(date)}</h5>
+                ${cards}                        
+            </div>
+        `;
+        
+        html += mealsInDay;
     });
+    $plan.html(html);
+
+    JumptoMeal();
+}
+
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const formattedDate = Intl.DateTimeFormat('en-GB', {
+        dateStyle: 'full'
+    }).format(date);
+    
+    return formattedDate;
+}
+
+
+function JumptoMeal() {
+    $('.card[id]').each(function() {
+        const $card = $(this);
+        const cardId = $card.attr('id');
+        const id = `#dt-${cardId.split('-').slice(-1)}`;
+        const mealName = $card.find('.card-title').text();
+        $card.on('click', () => {
+            table.search( mealName ).draw();
+            $(id).click();
+            jumpToMealViewer();
+            $('html, body').scrollTop($('#detailHeading').offset().top);
+        }); 
+    });
+}
 
 // get all the meals
 // get plan
@@ -717,6 +809,10 @@ var table = $('#mealsTable').DataTable({
         { target: 6, visible: false },
         { target: 7, visible: false },
     ],
+    createdRow: function(row, data, index) {    // attached ids to each row using the meal id
+        var id = `dt-${data[0]}`
+        $(row).attr('id', id);
+    },
     order: [[1, 'asc']], // order by name
     select: true
 });
@@ -807,6 +903,7 @@ function updateTable(meals) {
     });
     
     table.rows.add(mealRows).draw();
+    
     // when a row in the table is clicked show the meal details
     $('#mealsTable').on('click', 'tbody tr', function() {
         const data = table.row(this).data();
@@ -834,10 +931,15 @@ function updateTable(meals) {
             <button type="button" class="btn-second" onclick="jumpToEdit()"><i class="bi bi-pencil-fill"></i></button>
         `;
         const description = data[6];
-        const mealTime = `<p>⏰ ${data[8]}</p>`;
+        const mealSubHeader = `
+            <div class="col">
+                <h5>Ingredients</h5>
+            </div>
+            <div class="col-auto"><p>⏰ ${data[8]}</p></div>`;
+            
         $('#detailHeading').html(header);
         $('#mealToClipboard').html(btns);
-        $('#mealTime').html(mealTime);
+        $('#mealSubHeader').html(mealSubHeader);
         $('#detailIngredients').html(ingredients);
         $('#detailDescription').html(description);
     });
@@ -919,4 +1021,10 @@ function jumpToEdit() {
 
     $('#editMeals').val(id);
     $('#editMeals').trigger('change');
+}
+
+
+function jumpToMealViewer() {
+    const triggerEl = document.querySelector('#navbar a[href="#mealViewerTab"]');
+    bootstrap.Tab.getInstance(triggerEl).show();
 }

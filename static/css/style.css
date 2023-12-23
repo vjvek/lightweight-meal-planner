@@ -35,7 +35,8 @@ h1 {
 }
 
 .nav-underline .nav-link.active, .nav-underline .show>.nav-link {
-    border-bottom: 4px solid #6b2737;    
+    border-bottom: 4px solid #6b2737;
+    color: #6b2737;    
 }
 
 h3 {
@@ -55,10 +56,6 @@ hr {
     }
 }
 
-/* .nav-link.active {
-    color: grey !important;
-} */
-
 /* CREATE A MEAL / PLAN SECTIONS */
 
 .font-small {
@@ -71,6 +68,10 @@ input, select, button {
 
 .ingr-row input, .ingr-row select, .ingr-row button {
     margin-bottom: 0px;
+}
+
+.plan-row .meal-type {
+    margin-top: 10px;
 }
 
 input:not([type="checkbox"]), select, textarea {
@@ -230,4 +231,30 @@ button:not(:disabled):active {
 
 #servingInpt {
     width: 25%;
+}
+
+/* Meal Plan Viewer Section */
+
+.card {
+    box-shadow: 3px 3px 6px rgb(231 224 162);
+}
+
+#mealPlannerList .card-header {
+    background-color: rgb(255 209 209);
+}
+
+#mealPlannerList .saved-meal {
+    background-color: var(--nav-bar);
+}
+
+#mealPlannerList .card:hover > .saved-meal {
+    background-color: #d9fad3;
+}
+
+#mealPlannerList .card-body {
+    background-color: var(--input-bg-color);
+}
+
+.card:has(.saved-meal) {
+    cursor: pointer;
 }

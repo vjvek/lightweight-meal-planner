@@ -23,8 +23,8 @@
     </head>
     <body>
         <div class="container">
-            <div class="row">
-                <div class="col d-flex justify-content-center pt-4">
+            <div class="row d-flex justify-content-center">
+                <div class="col-auto pt-4">
                     <h1 class="mb-4">Meal Planner</h1>
                 </div>
             </div>
@@ -49,7 +49,7 @@
             <div class="tab-content">
                 <!-- View Meals -->
                 <div id="mealViewerTab" class="container tab-pane active"><br>
-                    <h3>My Meals</h3>
+                    <h2>My Meals</h2>
                     <p>All your meals are shown here. You can search across all of them to find what you're looking for. Select one to see full details.</p>
                     <div class="row">
                         <div class="col">
@@ -79,12 +79,7 @@
                             </div>
                             <div class="row">
                                 <div class="col">
-                                    <div class="row">
-                                        <div class="col">
-                                            <h5>Ingredients</h5>
-                                        </div>
-                                        <div id="mealTime" class="col-auto"></div>
-                                    </div>
+                                    <div id="mealSubHeader" class="row"></div>
                                     <div class="row">
                                         <div id="detailIngredients" class="col"></div>
                                     </div>
@@ -98,13 +93,30 @@
                 </div>
                 <!-- Meal Planner -->
                 <div id="mealPlannerTab" class="container tab-pane fade"><br>
-                    <h3>Meal Planner</h3>
+                    <div class="row">
+                        <div class="col">
+                            <h2>Meal Planner</h2>
+                            <p>You can view your meal plan here. Below it is your shopping list. This is dynamically generated base on the meals and the serving sizes you've set for them.</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div id="mealPlannerList" class="col"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <h3>Shopping List</h3>
+                            <p>All the ingredients you need to make the meals in your plan, with the serving sizes you've set, are shown below. You'll also be warned if you've included any meals in your plan that don't have any ingredients associated with them.</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="shoppingList" class="col"></div>
+                    </div>
                 </div>
                 <!-- Create/Edit a Meal -->
                 <div id="createMealTab" class="container tab-pane fade"><br>
                     <div class="row">
                         <div class="col">
-                            <h3>Create a Meal</h3>
+                            <h2>Create a Meal</h2>
                             <p>Create a meal or edit an existing one using the dropdown list below.</p>
                             <p>When creating a new meal, only the name is required. Everything else is optional. The meal creator provides you with the following features to help you get the most out of your meals:</p>
                             <ul>
@@ -190,7 +202,7 @@
                 <div id="createMealPlanTab" class="container tab-pane fade"><br>
                     <div class="row">
                         <div class="col">
-                            <h3>Create a Meal Plan</h3>
+                            <h2>Create a Meal Plan</h2>
                             <p>You can create and edit your plan here. To add a meal you just need to click the add button and fill in the details.</p>
                         </div>
                     </div>
