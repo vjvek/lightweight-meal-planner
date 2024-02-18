@@ -2,6 +2,7 @@
 
 :root {
     --nav-bar: #c9ffc1;
+    --title-color: #6b2737;
     --input-bg-color: rgb(255 253 235);
 }
 
@@ -11,7 +12,24 @@ body {
 
 body, div.container {
     background-color: rgb(255 250 211);
+}
 
+::-webkit-scrollbar {
+    width: 0.5vw;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--input-bg-color); 
+}
+   
+::-webkit-scrollbar-thumb {
+    background: var(--nav-bar);
+    border-radius: 10px; 
+}
+  
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #a3f097;
 }
 
 /* || SITEWIDE */
@@ -19,7 +37,7 @@ body, div.container {
 h1 {
     font-family: 'Indie Flower', cursive;
     font-size: 3.5em;
-    color: #6b2737;
+    color: var(--title-color);
 }
 
 #navbar {
@@ -35,8 +53,8 @@ h1 {
 }
 
 .nav-underline .nav-link.active, .nav-underline .show>.nav-link {
-    border-bottom: 4px solid #6b2737;
-    color: #6b2737;    
+    border-bottom: 4px solid var(--title-color);
+    color: var(--title-color);    
 }
 
 h3 {
@@ -44,9 +62,9 @@ h3 {
 }
 
 hr {
-    height: 5px;
+    height: 2px;
     border: none;
-    background: var(--nav-bar);
+    background: var(--title-color);
 }
 
 /* for mobile screens */
@@ -64,6 +82,12 @@ hr {
 
 input, select, button {
     margin-bottom: 10px;
+}
+
+.form-control:focus, .form-select:focus, #mealsTable_filter input[type="search"]:focus {
+    border-color: var(--nav-bar) !important;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 10px var(--nav-bar) !important;
+    outline: none;
 }
 
 .ingr-row input, .ingr-row select, .ingr-row button {
@@ -115,17 +139,6 @@ input:not([type="checkbox"]):disabled::placeholder, select:disabled, textarea:di
     resize: none;
 }
 
-
-#createMealForm textarea {
-    width: 100%;
-    height: 180px;
-    min-height: 226px;
-    padding: 5px 10px 5px 10px;
-    display: block;
-    overflow: hidden;
-    resize: none;
-}
-
 #createMealPlanTab textarea {
     width: 100%;
     height: 180px;
@@ -136,11 +149,9 @@ input:not([type="checkbox"]):disabled::placeholder, select:disabled, textarea:di
     resize: none;
 }
 
-#detailDescription {
+textarea {
     white-space: pre-line;
 }
-
-
 
 /* buttons */
 
@@ -223,8 +234,17 @@ button:not(:disabled):active {
     background-color: var(--input-bg-color);
 }
 
-#mealsTable tr:hover {
-    background-color: var(--nav-bar);
+.dataTables_wrapper .dataTables_filter input {
+    padding: 5px 10px 5px 10px;
+}
+
+#mealsTable tr:hover, .paginate_button.current {
+    background: var(--nav-bar) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:not(.disabled):hover {
+    background: var(--nav-bar);
+    color: black !important;
 }
 
 /* Meal Detail Section */
@@ -239,8 +259,12 @@ button:not(:disabled):active {
     box-shadow: 3px 3px 6px rgb(231 224 162);
 }
 
-#mealPlannerList .card-header {
-    background-color: rgb(255 209 209);
+#mealPlannerList strong {
+    color: #3943b7;
+}
+
+#mealPlannerList strong:hover {
+    color: var(--title-color);
 }
 
 #mealPlannerList .saved-meal {
@@ -257,4 +281,16 @@ button:not(:disabled):active {
 
 .card:has(.saved-meal) {
     cursor: pointer;
+}
+
+.card-body p, #detailDescription p {
+    white-space: pre-wrap;
+}
+
+.bi-exclamation-triangle, .bi-info-circle {
+    color: red;
+}
+
+.popover-body {
+    background-color: var(--input-bg-color);
 }

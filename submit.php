@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Makes sure the meal is is unique
+ */
 function makeIdUnique($mealArray, $meal) {
     $ids = [];
     // get all the keys
@@ -53,7 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
-
         $updatedMeals = json_encode($currentMealsArray);
         file_put_contents($recipes, $updatedMeals);
 

@@ -23,10 +23,8 @@
     </head>
     <body>
         <div class="container">
-            <div class="row d-flex justify-content-center">
-                <div class="col-auto pt-4">
-                    <h1 class="mb-4">Meal Planner</h1>
-                </div>
+            <div class="row d-flex justify-content-center align-items-center my-3">
+                <div class="col-auto"><h1 class="m-0">Meal Planner</h1></div>
             </div>
             <div class="row">
                 <div id="navbar" class="col py-3">
@@ -59,12 +57,13 @@
                                         <th scope="col">#</th>
                                         <th scope="col">Name</th>
                                         <th scope="col">Region</th>
-                                        <th scope="col">📜</th>
-                                        <th scope="col">🥗</th>
+                                        <th scope="col">Course</th>
+                                        <th scope="col" title="Description">📜</th>
+                                        <th scope="col" title="Ingredients">🥗</th>
                                         <th scope="col">IngredientText</th>
                                         <th scope="col">DescriptionText</th>
                                         <th scope="col">Serving Size</th>
-                                        <th scope="col">⏰</th>
+                                        <th scope="col" title="Time">⏰</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -74,12 +73,12 @@
                     <div class="row">
                         <div class="col">
                             <div class="row d-flex justify-content-between">
-                                <div id="detailHeading" class="col-10"></div>
-                                <div id="mealToClipboard" class="col-2 d-flex justify-content-end align-items-start"></div>
+                                <div id="detailHeading" class="col-8"></div>
+                                <div id="mealToClipboard" class="col-4 d-flex justify-content-end align-items-start"></div>
                             </div>
                             <div class="row">
                                 <div class="col">
-                                    <div id="mealSubHeader" class="row"></div>
+                                    <div id="mealSubHeader" class="row mt-3"></div>
                                     <div class="row">
                                         <div id="detailIngredients" class="col"></div>
                                     </div>
@@ -96,12 +95,13 @@
                     <div class="row">
                         <div class="col">
                             <h2>Meal Planner</h2>
-                            <p>You can view your meal plan here. Below it is your shopping list. This is dynamically generated base on the meals and the serving sizes you've set for them.</p>
+                            <p>You can view your meal plan here. Below it is your shopping list. This is dynamically generated based on the meals and the serving sizes you've set for them.</p>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div id="mealPlannerList" class="col"></div>
                     </div>
+                    <hr>
                     <div class="row">
                         <div class="col">
                             <h3>Shopping List</h3>
@@ -109,7 +109,8 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div id="shoppingList" class="col"></div>
+                        <div id="shoppingList" class="col-sm-12 col-md-6"></div>
+                        <div id="shoppingWarning" class="col-sm-12 col-md-6"></div>
                     </div>
                 </div>
                 <!-- Create/Edit a Meal -->
@@ -123,6 +124,12 @@
                                 <li>Adding quantities to your ingredients allows you to dynamically recalculate them based on your chosen serving size</li>
                                 <li>A sorting button to reorder ingredients</li>
                                 <li>Create dividers to split up your ingredients into sections</li>
+                            </ul>
+                            <p>Helpful tips:</p>
+                            <ul>
+                                <li>A meal can be saved with or without ingredients</li>
+                                <li>An ingredient can be saved with or without quantities</li>
+                                <li>If you're adding the quantity to an ingredient, you must include the unit otherwise it won't save</li>
                             </ul>
                         </div>
                     </div>
@@ -168,7 +175,7 @@
                                             </div>
                                         </div>
                                         <div class="col-sm-12 col-md-6 col-lg-8">
-                                            <textarea id="description" name="description" placeholder="Add a description here eg. the recipe steps" disabled></textarea>
+                                            <textarea id="description" class="form-control" name="description" placeholder="Add a description here eg. the recipe steps" disabled></textarea>
                                         </div>
                                     </div>
                                     <hr>
@@ -209,7 +216,7 @@
                     <hr>
                     <div class="row">
                         <div class="col d-flex justify-content-end">
-                            <button type="button" class="btn-main me-2" title="Add Another Ingredient" onclick="addNewMealRow()"><i class="bi bi-plus-lg" ></i></button>
+                            <button type="button" class="btn-main me-2" title="Add a meal to your plan" onclick="addNewMealRow()"><i class="bi bi-plus-lg" ></i></button>
                         </div>
                     </div>
                     <div class="row">
@@ -237,7 +244,7 @@
                                                 <input type="number" class="form-control meal-serving" min="1" placeholder="Serving Size"></input>
                                             </div>
                                             <div class="flex-grow-1 col-sm-12 col-md-auto col-lg-auto">
-                                                <textarea class="meal-note" placeholder="Add a note here"></textarea>
+                                                <textarea class="form-control meal-note" placeholder="Add a note here"></textarea>
                                             </div>
                                         </div>
                                     </div>
