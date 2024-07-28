@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Makes sure the meal is is unique
+ * Makes sure the meal id is unique
  */
 function makeIdUnique($mealArray, $meal) {
     $ids = [];

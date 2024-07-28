@@ -1,9 +1,10 @@
 /* || GENERAL STYLES */
 
 :root {
-    --nav-bar: #c9ffc1;
-    --title-color: #6b2737;
-    --input-bg-color: rgb(255 253 235);
+    --nav-bar: hsl(112, 100%, 88%);
+    --title-color: hsl(346, 47%, 29%);
+    --main-bg-color: hsl(53, 100%, 91%);
+    --input-bg-color: hsl(54, 100%, 96%);
 }
 
 body {
@@ -11,7 +12,7 @@ body {
 }
 
 body, div.container {
-    background-color: rgb(255 250 211);
+    background-color: var(--main-bg-color);
 }
 
 ::-webkit-scrollbar {
@@ -19,7 +20,7 @@ body, div.container {
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--input-bg-color); 
+    background: var(--main-bg-color); 
 }
    
 ::-webkit-scrollbar-thumb {
@@ -40,16 +41,20 @@ h1 {
     color: var(--title-color);
 }
 
+.text-small {
+    font-size: 0.8rem;
+}
+
 #navbar {
     background-color: var(--nav-bar);
 }
 
 .nav-link {
-    border-bottom: 4px solid #3943b7;
+    border-bottom: 4px solid hsl(235, 53%, 47%);
 }
 
 .nav-link:hover {
-    border-bottom: 4px solid #636edd;
+    border-bottom: 4px solid hsl(235, 64%, 63%);
 }
 
 .nav-underline .nav-link.active, .nav-underline .show>.nav-link {
@@ -86,7 +91,7 @@ input, select, button {
 
 .form-control:focus, .form-select:focus, #mealsTable_filter input[type="search"]:focus {
     border-color: var(--nav-bar) !important;
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 10px var(--nav-bar) !important;
+    box-shadow: inset 0 1px 1px hsla(0, 0%, 0%, 0.075), 0 0 10px var(--nav-bar) !important;
     outline: none;
 }
 
@@ -156,9 +161,11 @@ textarea {
 /* buttons */
 
 button {
+    background-color: hsl(53, 100%, 91%); 
+    border: 6px solid var(--btn-color);
     border-radius: 7px;
+    box-shadow: 2px 2px 0 0 white, 4px 4px 0 0 var(--btn-color);
     padding: 4px 9px;
-    background-color: rgb(255 250 211); 
     transition-duration: 200ms;
 }
 
@@ -168,20 +175,14 @@ button.dlt-ingr, button.dlt-plan {
 
 .btn-main {
     --btn-color: #3943b7;
-    border: 6px solid var(--btn-color);
-    box-shadow: 2px 2px 0 0 white, 4px 4px 0 0 var(--btn-color);
 }
 
 .btn-second {
     --btn-color: #6b2737;
-    border: 6px solid var(--btn-color);
-    box-shadow: 2px 2px 0 0 white, 4px 4px 0 0 var(--btn-color);
 }
 
 .btn-third {
     --btn-color: #E08e45;
-    border: 6px solid var(--btn-color);
-    box-shadow: 2px 2px 0 0 white, 4px 4px 0 0 var(--btn-color);
 }
 
 button:not(:disabled):hover {
@@ -256,11 +257,11 @@ button:not(:disabled):active {
 /* Meal Plan Viewer Section */
 
 .card {
-    box-shadow: 3px 3px 6px rgb(231 224 162);
+    box-shadow: 3px 3px 6px hsl(54, 59%, 77%);
 }
 
 #mealPlannerList strong {
-    color: #3943b7;
+    color: hsl(235, 53%, 47%);
 }
 
 #mealPlannerList strong:hover {
@@ -272,7 +273,7 @@ button:not(:disabled):active {
 }
 
 #mealPlannerList .card:hover > .saved-meal {
-    background-color: #d9fad3;
+    background-color: hsl(111, 80%, 90%);
 }
 
 #mealPlannerList .card-body {
@@ -288,7 +289,7 @@ button:not(:disabled):active {
 }
 
 .bi-exclamation-triangle, .bi-info-circle {
-    color: red;
+    color: hsl(0, 100%, 50%);
 }
 
 .popover-body {
