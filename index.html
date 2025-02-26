@@ -23,32 +23,30 @@
     </head>
     <body>
         <div class="container">
-            <div class="row d-flex justify-content-center align-items-center my-3">
+            <div class="row d-flex justify-content-center align-items-center py-2 py-sm-3">
                 <div class="col-auto">
                     <header><h1 class="m-0">Meal Planner</h1></header>
                 </div>
             </div>
-            <div class="row">
-                <div id="navbar" class="col py-3">
-                    <ul class="nav nav-underline justify-content-center" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active" data-bs-toggle="tab" href="#mealViewerTab">My Meals</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#mealPlannerTab">Meal Planner</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#createMealTab">Create a Meal</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#createMealPlanTab">Create a Meal Plan</a>
-                        </li>
-                    </ul>
-                </div>
+            <div id="navbar" class="py-sm-3">
+                <ul class="nav nav-underline justify-content-center" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link d-flex justify-content-center active" data-bs-toggle="tab" href="#mealViewerTab"><span>My Meals</span><i class="bi bi-list"></i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex justify-content-center" data-bs-toggle="tab" href="#mealPlannerTab"><span>Meal Planner</span><i class="bi bi-calendar2-week"></i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex justify-content-center" data-bs-toggle="tab" href="#createMealTab"><span>Create a Meal</span><i class="bi bi-pen"></i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex justify-content-center" data-bs-toggle="tab" href="#createMealPlanTab"><span>Create a Meal Plan</span><i class="bi bi-card-heading"></i></a>
+                    </li>
+                </ul>
             </div>
-            <div class="tab-content">
+            <div class="tab-content mt-3">
                 <!-- View Meals -->
-                <div id="mealViewerTab" class="container tab-pane active"><br>
+                <div id="mealViewerTab" class="container tab-pane active">
                     <h2>My Meals</h2>
                     <p>All your meals are shown here. You can search across all of them to find what you're looking for. Select one to see full details.</p>
                     <div class="row">
@@ -78,7 +76,7 @@
                                 <div id="detailHeading" class="col-8"></div>
                                 <div id="mealToClipboard" class="col-4 d-flex justify-content-end align-items-start"></div>
                             </div>
-                            <div class="row">
+                            <div class="row mb-3">
                                 <div class="col">
                                     <div id="mealSubHeader" class="row mt-3"></div>
                                     <div class="row">
@@ -87,13 +85,16 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div id="detailDescription" class="col"></div>
+                                <div class="col">
+                                    <div id="detailDescription">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <!-- Meal Planner -->
-                <div id="mealPlannerTab" class="container tab-pane fade"><br>
+                <div id="mealPlannerTab" class="container tab-pane fade">
                     <div class="row">
                         <div class="col">
                             <h2>Meal Planner</h2>
@@ -106,7 +107,7 @@
                     <hr>
                     <div class="row">
                         <div class="col">
-                            <h3>Shopping List</h3>
+                            <h2>Shopping List</h2>
                             <p>All the ingredients you need to make the meals in your plan, with the serving sizes you've set, are shown below. You'll also be warned if you've included any meals in your plan that don't have any ingredients associated with them.</p>
                         </div>
                     </div>
@@ -116,7 +117,7 @@
                     </div>
                 </div>
                 <!-- Create/Edit a Meal -->
-                <div id="createMealTab" class="container tab-pane fade"><br>
+                <div id="createMealTab" class="container tab-pane fade">
                     <div class="row">
                         <div class="col">
                             <h2>Create a Meal</h2>
@@ -199,7 +200,7 @@
                                     </div>
                                     <div id="ingredients"></div>
                                     <hr>
-                                    <div id="formBtns">
+                                    <div class="button-holder">
                                         <button type="button" id="saveMealBtn" class="btn-main me-2" onclick="saveMeal()" disabled>Save Meal</button>
                                         <button type="button" id="updateMealBtn"class="btn-main me-2" onclick="updateMeal()" style="display: none;">Update Meal</button>
                                         <button type="button" id="deleteMealBtn"class="btn-second me-2" onclick="deleteMeal()" style="display: none;">Delete Meal</button>
@@ -211,7 +212,7 @@
                     </div>
                 </div>
                 <!-- Create Meal Plan -->
-                <div id="createMealPlanTab" class="container tab-pane fade"><br>
+                <div id="createMealPlanTab" class="container tab-pane fade">
                     <div class="row">
                         <div class="col">
                             <h2>Create a Meal Plan</h2>
@@ -254,7 +255,7 @@
                                         </div>
                                     </div>
                                     <hr>
-                                    <div>
+                                    <div class="button-holder">
                                         <button type="button" id="savePlanBtn" class="btn-main me-2" onclick="savePlan()">Save Plan</button>
                                     </div>
                                 </div>
