@@ -19,9 +19,9 @@ function makeIdUnique($mealArray, $meal) {
     return $meal;
 }
 
-$recipes = 'data/recipes.json';
-$ingredients = 'data/ingredients.json';
-$plan = 'data/plan.json';
+$recipes = 'recipes.json';
+$ingredients = 'ingredients.json';
+$plan = 'plan.json';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode($_POST['payload'], true);

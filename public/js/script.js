@@ -130,7 +130,7 @@ function getIngredients() {
     return new Promise((resolve, reject) => {
         const request = $.ajax({
             type: "GET",
-            url: "submit.php",
+            url: "/api/submit.php",
             datatype: 'json',
             data: {'type': 'ingredients'}
         });
@@ -240,7 +240,7 @@ function getMeals(type, id) {
     return new Promise((resolve, reject) => {
         const request = $.ajax({
             type: "GET",
-            url: "submit.php",
+            url: "/api/submit.php",
             datatype: 'json',
             data: {'type': type, 'id': id}
         });
@@ -285,7 +285,7 @@ function postMeal(meal, mode) {
     $('button').prop('disabled', true);
     const request = $.ajax({
         type: "POST",
-        url: "submit.php",
+        url: "/api/submit.php",
         datatype: 'json',
         data: {
             'payload': JSON.stringify(meal),
@@ -704,7 +704,7 @@ function savePlan() {
 function postPlan(plan) {
     const request = $.ajax({
         type: "POST",
-        url: "submit.php",
+        url: "/api/submit.php",
         datatype: 'json',
         data: {
             'payload': JSON.stringify(plan),
@@ -728,7 +728,7 @@ function getPlan() {
     return new Promise((resolve, reject) => {
         const request = $.ajax({
             type: "GET",
-            url: "submit.php",
+            url: "/api/submit.php",
             datatype: 'json',
             data: {'type': 'plan'},
         });
