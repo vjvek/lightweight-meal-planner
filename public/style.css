@@ -1,0 +1,338 @@
+/* || GENERAL STYLES */
+
+:root {
+    --nav-bar: hsl(112, 100%, 88%);
+    --title-color: hsl(346, 47%, 29%);
+    --main-bg-color: hsl(53, 100%, 91%);
+    --input-bg-color: hsl(54, 100%, 96%);
+}
+
+body {
+    font-family: 'Quicksand', sans-serif;
+}
+
+body, div.container {
+    background-color: var(--main-bg-color);
+}
+
+::-webkit-scrollbar {
+    width: 0.5vw;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--main-bg-color); 
+}
+   
+::-webkit-scrollbar-thumb {
+    background: var(--nav-bar);
+    border-radius: 10px; 
+}
+  
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: hsl(112, 75%, 77%);
+}
+
+/* || SITEWIDE */
+
+h1 {
+    font-family: 'Indie Flower', cursive;
+    font-size: 3.5rem;
+    color: var(--title-color);
+}
+
+.text-small {
+    font-size: 0.8rem;
+}
+
+#navbar {
+    background-color: var(--nav-bar);
+}
+
+.nav-link {
+    border-bottom: 4px solid hsl(235, 53%, 47%);
+    color: var(--title-color);
+}
+
+.nav-link:hover {
+    border-bottom: 4px solid hsl(235, 64%, 63%);
+    color: var(--title-color);
+}
+
+.nav-underline .nav-link.active, .nav-underline .show > .nav-link {
+    border-bottom: 4px solid var(--title-color);
+    color: var(--title-color);    
+}
+
+@media screen and (width < 576px) {
+    .container {
+        margin-bottom: 70px;
+    }
+
+    .row:has(header) {
+        background-color: var(--nav-bar);
+    }
+
+    #navbar {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        z-index: 1;
+
+        > ul {
+            display: grid;
+            grid-auto-columns: 60px;
+            grid-auto-flow: column;
+            align-items: center;
+            padding: 0.25em;
+        }
+
+        span {
+            display: none;
+        }
+
+        i {
+            display: inline-block;
+            font-size: 1.5rem;
+        }
+    }
+
+    .button-holder button {
+        width: 100%;
+    }
+}
+
+@media screen and (width >= 576px) {
+    #navbar i {
+        display: none;
+    }
+}
+
+hr {
+    height: 2px;
+    border: none;
+    background: var(--title-color);
+}
+
+/* for mobile screens */
+@media screen and (max-width: 768px) {
+    input[name="quantity"], input[name="unit"], .dlt-ingr{
+        margin: 10px 0px 10px 0px !important;
+    }
+}
+
+/* CREATE A MEAL / PLAN SECTIONS */
+
+.font-small {
+    font-size: 0.8rem;
+}
+
+input, select, button {
+    margin-bottom: 10px;
+}
+
+.form-control:focus, .form-select:focus, #mealsTable_filter input[type="search"]:focus {
+    border-color: var(--nav-bar) !important;
+    box-shadow: inset 0 1px 1px hsla(0, 0%, 0%, 0.075), 0 0 10px var(--nav-bar) !important;
+    outline: none;
+}
+
+.ingr-row input, .ingr-row select, .ingr-row button {
+    margin-bottom: 0;
+}
+
+.plan-row .meal-type {
+    margin-top: 10px;
+}
+
+input:not([type="checkbox"]), select, textarea {
+    background-color: var(--input-bg-color) !important;
+}
+
+input:not([type="checkbox"]):disabled::placeholder, select:disabled, textarea:disabled::placeholder {
+    color: #d4d4d4 !important;
+}
+
+#serving {
+    margin-bottom: 10px;
+}
+
+#createMealForm div.col:has(#totalTime) {
+    margin-right: 5px;
+    padding-right: 0px;
+}
+
+#createMealForm div.col:has(#timeUnit) {
+    margin-left: 5px;
+    padding-left: 0px;
+}
+
+.select2-selection__rendered {
+    line-height: 37.33px !important;
+    margin-bottom: 10px;
+}
+
+.select2-container .select2-selection--single {
+    height: 37.33px !important;
+}
+
+#createMealForm textarea {
+    width: 100%;
+    height: 180px;
+    min-height: 226px;
+    overflow: hidden;
+    resize: none;
+}
+
+#createMealPlanTab textarea {
+    width: 100%;
+    height: 180px;
+    min-height: 179px;
+    overflow: hidden;
+    resize: none;
+}
+
+textarea {
+    white-space: pre-line;
+}
+
+/* buttons */
+
+button {
+    background-color: hsl(53, 100%, 91%); 
+    border: 6px solid var(--btn-color);
+    border-radius: 7px;
+    box-shadow: 2px 2px 0 0 white, 4px 4px 0 0 var(--btn-color);
+    padding: 4px 9px;
+    transition-duration: 200ms;
+}
+
+button.dlt-ingr, button.dlt-plan {
+    padding: 0px 4px;
+}
+
+.btn-main {
+    --btn-color: #3943b7;
+}
+
+.btn-second {
+    --btn-color: #6b2737;
+}
+
+.btn-third {
+    --btn-color: #E08e45;
+}
+
+button:not(:disabled):hover {
+    box-shadow: 3px 3px white, 6px 6px 0 0 var(--btn-color);
+    transform: translate(-2px, -2px);
+}
+
+button:not(:disabled):active {
+    box-shadow: 0px 0px white, 0px 0px 0 0 var(--btn-color);
+    transform: translate(2px, 2px);
+}
+
+.sort-enabled {
+    cursor: grab;
+}
+
+.sort-enabled:active {
+    cursor: grabbing;
+}
+
+/* SELECT2 */
+
+.select2-selection__arrow {
+    height: 34px !important;
+}
+
+.select2-selection.select2-selection--single, .select2-search,
+.select2-results__option.select2-results__option--selectable,
+.select2-results__option.select2-results__option--disabled {
+    background-color: var(--input-bg-color);
+}
+
+.select2-search input {
+    background-color: var(--input-bg-color) !important;
+}
+
+/* css for highlighted option */
+.select2-results__option.select2-results__option--selectable.select2-results__option--highlighted {
+    color: black;
+    background-color: #c9ffc1 !important;
+}
+
+/* DATATABLE */
+
+#mealsTable {
+    width: 100% !important;
+}
+
+#mealsTable tbody {
+    background-color: var(--input-bg-color);
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    padding: 5px 10px;
+}
+
+#mealsTable tr:hover, .paginate_button.current {
+    background: var(--nav-bar) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:not(.disabled):hover {
+    background: var(--nav-bar);
+    color: black !important;
+}
+
+/* Meal Detail Section */
+
+#servingInpt {
+    width: 25%;
+}
+
+/* Meal Plan Viewer Section */
+
+.card {
+    border-radius: 0.5rem;
+    border: none;
+    background-color: var(--input-bg-color);
+}
+
+#mealPlannerList strong {
+    color: hsl(235, 53%, 47%);
+}
+
+#mealPlannerList strong:hover {
+    color: var(--title-color);
+}
+
+#mealPlannerList .saved-meal {
+    background-color: var(--nav-bar);
+}
+
+#mealPlannerList .card:hover > .saved-meal {
+    background-color: hsl(111, 80%, 90%);
+}
+
+#mealPlannerList .card-body {
+    background-color: var(--input-bg-color);
+}
+
+.card:has(.saved-meal) {
+    cursor: pointer;
+}
+
+.card-body p, #detailDescription p {
+    white-space: pre-wrap;
+}
+
+.bi-exclamation-triangle, .bi-info-circle {
+    color: hsl(0, 100%, 50%);
+}
+
+.popover-body {
+    background-color: var(--input-bg-color);
+}
