@@ -1,105 +1,62 @@
-// Initial app setup
-var latestId = 1;
-var globalMeals;
+// Global Types
 
-$('textarea').on('input change', function() {
-    this.style.height = 'auto';
-    this.style.height = (this.scrollHeight) + 'px';
-});
+type Ingredient = {
+    name: string;
+    quant?: string;
+    unit?: string;
+};
 
-observerSelect2();
-addNewIngr();
+type IngredientDivider = {
+    div: string;
+}
 
-setTimeout(() => {
-    ingrRow = $('#ingredients').clone().html(); // used to create new ingredients
-}, 500);
+type Time = {
+    len: string;
+    unit: string;
+}
 
-updateApp(updateId=true);
+type Meal = {
+    name: string;
+    region: string;
+    course: string;
+    serv: string;
+    time: Time;
+    desc: string;
+    ingrs: (Ingredient | IngredientDivider)[];
+};
 
-setTimeout(() => {
-    mealRow = $('.plan-list').clone().html(); // used to create new meals for the plan
-}, 500);
+type MealRecord = {
+    id: Meal;
+};
 
-setTimeout(() => {
-    getPlan().then((plan) => {
-        showPlanForm(plan);
-        updatePlanList(plan);
-        createShoppingList(plan);
-    });
-}, 500)
-
-$('#editMeals').select2({ width: '100%' });
-
-// handles disabling of the inputs in the create a meal section
-var $otherInputs = $('#createMealForm :input:not(#editMeals, #mealName, #dltIngrBtn)');
-
-$('#editMeals').on('change', () => {
-    if ($('#editMeals').val()) {
-        $otherInputs.prop('disabled', false);
-    }
-    else {
-        $otherInputs.prop('disabled', true);
-    }
-});
-
-// the same meal name can't be used twice
-$('#mealName').on('keyup', () => {
-    const mealName = $('#mealName').val();
-    
-    if (mealName) {
-        getMeals('all_meals')
-            .then((meals) => {
-                const mealToEditId = $('#editMeals').val()
-                const index = meals.findIndex((meal) => meal.hasOwnProperty(mealToEditId));
-                // this allows you to update the name of an existing meal
-                if (mealToEditId > 0) {
-                    meals.splice(index, 1);
-                }
-                // check to see if the meal name matches an existing meal
-                let duplicateMeal = false;
-                meals.forEach((meal) => {
-                    Object.values(meal).forEach(mealDict => {
-                        if (mealName.toLowerCase() === mealDict.name.toLowerCase()) {
-                            duplicateMeal = true;
-                            return;
-                        }
-                    });
-                });
-
-                if (!duplicateMeal) {
-                    $otherInputs.prop('disabled', false);
-                    $('#duplicateMealName').hide();
-                }
-                else {
-                    $otherInputs.prop('disabled', true);
-                    $('#duplicateMealName').show();
-                }
-            });
-    }
-    else {
-        $otherInputs.prop('disabled', true);
-    }
-});
+type Plan = {
+    date: string; 
+    meal_id: string; 
+    meal_name: string; 
+    meal_type: string; 
+    serv: string;
+    note: string; 
+};
 
 
 /**
  * Create a mutation observer that looks for select elements in specific DOM nodes.
  * When this is observed, apply `select2` to it. 
  */
-function observerSelect2() {
+function observerSelect2(): void {
     // create a mutation observer that watches #ingredients
-    const targetNode1 = document.getElementById("ingredients");
-    const targetNode2 = document.getElementById("createPlanForm");
+    const targetNode1 = document.getElementById("ingredients")!;
+    const targetNode2 = document.getElementById("createPlanForm")!;
     // options for the observer (which mutations to observe)
     const config = { childList: true, subtree: true };
     // callback function to execute when mutations are observed
-    const callback = (mutationList, observer) => {
+    const callback = (mutationList: MutationRecord[], observer: MutationObserver) => {
         for (const mutation of mutationList) {
             if (mutation.type === "childList" && mutation.addedNodes.length >= 1) {
                 // apply select2 to the ingredients rows
-                const $newNode = $(mutation.addedNodes[1])
-                isNewIngr = $newNode.hasClass('ingr-row') || $newNode.hasClass('ingr-div');
-                isNewPlan = $newNode.hasClass('plan-row');
+                const $newNode = $(mutation.addedNodes[1] as HTMLElement);
+                const isNewIngr = $newNode.hasClass('ingr-row') || $newNode.hasClass('ingr-div');
+                const isNewPlan = $newNode.hasClass('plan-row');
 
                 if (isNewIngr) {
                     setTimeout(() => {
@@ -124,22 +81,17 @@ function observerSelect2() {
 
 /**
  * AJAX request to get all the ingredients.
- * @returns {array} - Array of all the inrgedients
+ * @returns {Array} - Array of all the inrgedients
  */
-function getIngredients() {
+function getIngredients(): Promise<(Ingredient | IngredientDivider)[]> {
     return new Promise((resolve, reject) => {
         const request = $.ajax({
             type: "GET",
             url: "/api/submit.php",
-            datatype: 'json',
-            data: {'type': 'ingredients'}
+            data: {type: 'ingredients'}
         });
-        request.done((ingrs) => {
-            resolve(JSON.parse(ingrs));
-        });
-        request.fail(() => {
-            console.log("couldn't get the ingredients!")
-        });
+        request.done((ingrs) => resolve(JSON.parse(ingrs)));
+        request.fail(_ => console.error("Failed to get the ingredients!"));
     });
 }
 
@@ -147,11 +99,10 @@ function getIngredients() {
 /**
  * Creates the ingredient row that allows a user to save an ingredient against a meal.
  */
-function addNewIngr() {
-    var ingredients = '';
+function addNewIngr(): void {
     getIngredients()
         .then((ingrs) => {
-            var ingrSelect = `
+            let ingrSelect = `
                 <select class="form-select ingr-select" name="ingredient" required>
                 <option value="" disabled selected>Ingredient</option>
             `;
@@ -161,35 +112,35 @@ function addNewIngr() {
             });
             ingrSelect += '</select>';
 
-        const html = `
-            <div class="row d-flex align-items-center ingr-row mb-2">
-                <div class="col-md-12 col-lg-auto">
-                    <button type="button" class="btn-third dlt-ingr" title="Delete This Row" onclick="deleteIngredient(this)"><i class="bi bi-trash"></i></button>
-                </div>
-                <div class="col-sm-12 col-md-6 col-lg-3">
-                    ${ingrSelect}
-                </div>
-                <div class="col-sm-12 col-md-3 col-lg-3">
-                    <input type="number" class="form-control" name="quantity" min="0" placeholder="Quantity">
-                </div>
-                <div class="col-sm-12 col-md-3 col-lg-3">
-                    <select name="unit" class="form-select">
-                        <option value="" disabled selected>Unit</option>
-                        <option value="g">Grams (g)</option>
-                        <option value="ml">Millilitres (ml)</option> 
-                        <option value="tsp">Teaspoon (tsp)</option>
-                        <option value="tbsp">Tablespoon (tbsp)</option>
-                        <option value="cups">Cups</option>
-                        <option value="whole">Whole</option>
-                        <option value="sprigs">Sprigs</option>
-                        <option value="sticks">Sticks</option>
-                    </select>
-                </div>
-            </div>`;
-        ingredients += html;
+            const ingrRow = `
+                <div class="row d-flex align-items-center ingr-row mb-2">
+                    <div class="col-md-12 col-lg-auto">
+                        <button type="button" class="btn-third dlt-ingr" title="Delete This Row"><i class="bi bi-trash"></i></button>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-3">
+                        ${ingrSelect}
+                    </div>
+                    <div class="col-sm-12 col-md-3 col-lg-3">
+                        <input type="number" class="form-control" name="quantity" min="0" placeholder="Quantity">
+                    </div>
+                    <div class="col-sm-12 col-md-3 col-lg-3">
+                        <select name="unit" class="form-select">
+                            <option value="" disabled selected>Unit</option>
+                            <option value="g">Grams (g)</option>
+                            <option value="ml">Millilitres (ml)</option> 
+                            <option value="tsp">Teaspoon (tsp)</option>
+                            <option value="tbsp">Tablespoon (tbsp)</option>
+                            <option value="cups">Cups</option>
+                            <option value="whole">Whole</option>
+                            <option value="sprigs">Sprigs</option>
+                            <option value="sticks">Sticks</option>
+                        </select>
+                    </div>
+                </div>`;
 
-        $('#ingredients').append(ingredients);
-        scrollToNewIngr();
+            $('#ingredients').append(ingrRow);
+            $('.dlt-ingr').on('click', deleteIngredient);
+            scrollToNewIngr();
     });
 }
 
@@ -198,34 +149,34 @@ function addNewIngr() {
  * Creates the html for the ingredient divider.
  * @returns {string} div - string of the html for the divider input.
  */
-function createIngrDiv() {
-    const div = `
+function createIngrDiv(): string {
+    return `
         <div class="row d-flex align-items-center ingr-div">
             <div class="col-auto">
-                <button type="button" class="btn-third dlt-ingr" title="Delete This Row" onclick="deleteIngredient(this)"><i class="bi bi-trash"></i></button>
+                <button type="button" class="btn-third dlt-ingr" title="Delete This Row"><i class="bi bi-trash"></i></button>
             </div>
             <div class="col-sm-12 col-md-6 col-lg-9">
                 <input type="text" class="form-control" name="ingrDiv" placeholder="Splits ingredients into sections with some text eg. these ingredients are for the pie filling:">
             </div>
         </div>
     `;
-    return div;
 }
 
 
 /**
  * Adds the ingredient divider html to the DOM.
  */
-function addIngrDiv() {
+function addIngrDiv(): void {
     $('#ingredients').append(createIngrDiv());
+    $('.dlt-ingr').on('click', deleteIngredient);
 }
 
 
 /**
  * Allows a user to delete ingredients and their dividers.
  */
-function deleteIngredient(btn) {
-    const $ingrRow = $(btn);
+function deleteIngredient(this: HTMLButtonElement): void {
+    const $ingrRow = $(this);
     $ingrRow.closest('.row').remove();
 }
 
@@ -233,23 +184,20 @@ function deleteIngredient(btn) {
 /**
  * AJAX GET request to get all meals or a specific one via the id.
  * @param {string} type - Determines type of get request. Should be 'all_meals' or 'a_meal'
- * @param {number} id - Id of the meal when a single meal is requested
- * @returns {array} - Array of the meal(s).
+ * @param {number?} id - Id of the meal when a single meal is requested
+ * @returns {Array} - Array of the meal(s).
  */
-function getMeals(type, id) {
+function getMeals(type: string): Promise<MealRecord[]>;
+function getMeals(type: string, id: string): Promise<MealRecord>;
+function getMeals(type: string, id?: string): Promise<MealRecord[] | MealRecord> {
     return new Promise((resolve, reject) => {
         const request = $.ajax({
             type: "GET",
             url: "/api/submit.php",
-            datatype: 'json',
-            data: {'type': type, 'id': id}
+            data: {type: type, id: id}
         });
-        request.done((resp) => {
-            resolve(JSON.parse(resp));
-        });
-        request.fail(() => {
-            console.log('get request failed!');
-        });
+        request.done((meals) => resolve(JSON.parse(meals)));
+        request.fail(_ => console.error('Failed to get meals!'));
     });
 }
 
@@ -261,7 +209,7 @@ function getMeals(type, id) {
  * 2. `update` - An existing meal is being udpated
  * 3. `delete` - Delete this meal
  */
-function postMeal(meal, mode) {
+function postMeal(meal: MealRecord, mode: string): void {
     let $updateBtn = $('#updateMealBtn');
     let $deleteBtn = $('#deleteMealBtn');
     const spinner = `
@@ -286,13 +234,12 @@ function postMeal(meal, mode) {
     const request = $.ajax({
         type: "POST",
         url: "/api/submit.php",
-        datatype: 'json',
         data: {
-            'payload': JSON.stringify(meal),
-            'mode': mode
+            payload: JSON.stringify(meal),
+            mode: mode
         }
     });
-    request.done((meals) => {        
+    request.done(_ => {        
         if (mode !== 'delete') {
             $updateBtn
                 .empty()
@@ -308,19 +255,17 @@ function postMeal(meal, mode) {
             if (mode !== 'delete') {
                 $updateBtn.text('Update Meal');
                 $deleteBtn.show();
-                updateApp(updateId=false);
+                updateApp({ updateId: false });
             }
             else {
                 $deleteBtn.text('Delete Meal');
                 $deleteBtn.hide();
-                updateApp(updateId=true);
+                updateApp( {updateId: true });
                 resetForm();
             }
         }, 2000);
     });
-    request.fail(() => {
-        console.log('failed to post meal');  
-    });
+    request.fail(_ => console.error('Failed to save meal!'));
 }
 
 
@@ -329,81 +274,76 @@ function postMeal(meal, mode) {
  * This can then be POSTed back to the server.
  * @returns {Object} meal - Dictionary containing the meal details
  */
-function mealToDict() {
+function mealToDict(): MealRecord {
     const $formData = $('#createMealForm');
-    const id = $('#mealId').val();
-    const meal = {};
-    const dictMeal = {
-        "name": $formData.find('#mealName').val(),
-        "region": $formData.find('#region').val(),
-        "course": $formData.find('#course').val(),
-        "serv": $formData.find('#serving').val(),
-        "time": {
-            "len": $formData.find('#totalTime').val(),
-            "unit": $formData.find('#timeUnit').val()
+    const dictMeal: Meal = {
+        name: $formData.find('#mealName').val() as string,
+        region: $formData.find('#region').val() as string,
+        course: $formData.find('#course').val() as string,
+        serv: $formData.find('#serving').val() as string,
+        time: {
+            len: $formData.find('#totalTime').val() as string,
+            unit: $formData.find('#timeUnit').val() as string
         },
-        "desc": $formData.find('#description').val(),
+        desc: $formData.find('#description').val() as string,
+        ingrs: []
     };
     const $ingrRows = $formData.find('#ingredients .row');
     // create the ingredients
-    var ingredients = [];    
     $ingrRows.each(function() {
         const $ingr = $(this);
         // handles ingredients
         if ($ingr.hasClass('ingr-row')) {
-            const $name = $ingr.find('select[name="ingredient"]').val();
-            const $quantity = $ingr.find('input[name="quantity"]').val();
-            const $unit = $ingr.find('select[name="unit"]').val();
+            const $name = $ingr.find('select[name="ingredient"]').val() as string;
+            const $quantity = $ingr.find('input[name="quantity"]').val() as string;
+            const $unit = $ingr.find('select[name="unit"]').val() as string;
 
-            var ingredient = {}
+            let ingredient = {} as Ingredient;
             
             if ($name) {
-                ingredient['name'] = $name;
+                ingredient.name = $name;
                 if ($quantity && $unit) {
-                    ingredient['quant'] = $quantity;
-                    ingredient['unit'] = $unit;
+                    ingredient.quant = $quantity;
+                    ingredient.unit = $unit;
                 }
             }
             // don't save rows with no ingredient name
             if (Object.keys(ingredient).length) {
-                ingredients.push(ingredient);
+                dictMeal.ingrs.push(ingredient);
             }
         }
         // handles dividers
         else if ($ingr.hasClass('ingr-div')) {
-            var ingrDiv = $ingr.find('input[name="ingrDiv"]').val()
+            let ingrDiv = $ingr.find('input[name="ingrDiv"]').val() as string;
             if (ingrDiv) {
-                var divText = {
-                    'div': ingrDiv
-                }
-                ingredients.push(divText);
+                const divText: IngredientDivider = {
+                    div: ingrDiv
+                };
+                dictMeal.ingrs.push(divText);
             }
         }     
     });
-
-    dictMeal["ingrs"] = ingredients;
-    meal[id] = dictMeal;
-
-    return meal;
+    let id = $('#mealId').val();
+    return {id: dictMeal};
 }
 
 
 // saves a meal
-function saveMeal() {
+function saveMeal(): void {
     const meal = mealToDict();
     postMeal(meal, 'create');
 }
 
 
 // updates an existing meal
-function updateMeal() {
+function updateMeal(): void {
     const meal = mealToDict();
     postMeal(meal, 'update');
 }
 
 
 // deletes a meal
-function deleteMeal() {
+function deleteMeal(): void {
     const meal = mealToDict();
     postMeal(meal, 'delete');
 }
@@ -412,25 +352,24 @@ function deleteMeal() {
 /**
  * Updates the max id which is used to create a new meal. 
  * This ensures ids are always unique client side
- * @param {array} meals - Array of the meals which is used to calculate the max id 
+ * @param {Array} meals - Array of the meals which is used to calculate the max id 
  */
-function updateMaxId(meals) {
-    if (meals) {
-        // get an array of the ids
-        var ids = [];
-        meals.forEach((meal) => {
-            for (const id in meal) {
-                ids.push(id);
-            }
-        });
-        // convert the ids to ints and gets the max
-        const maxId = Math.max(...ids);
-        latestId = maxId + 1;
-        $('#mealId').val(latestId);
-    }
-    else {
+function updateMaxId(meals: MealRecord[]): void {
+    if (!meals) {
         $('#mealId').val(1);
+        return;
     }
+    // get an array of the ids
+    let ids: number[] = [];
+    meals.forEach((meal) => {
+        for (const id in meal) {
+            ids.push(parseInt(id));
+        }
+    });
+    // convert the ids to ints and gets the max
+    const maxId = Math.max(...ids);
+    latestId = maxId + 1;
+    $('#mealId').val(latestId);
 }
 
 
@@ -440,7 +379,7 @@ function updateMaxId(meals) {
  * 2. Datatable gets updated
  * 3. Edit meal select gets updated
  */
-function updateApp(updateId=true) {
+function updateApp({ updateId = true }: {updateId: boolean}): void {
     getMeals('all_meals')
         .then((meals) => {
             if (updateId) {
@@ -458,11 +397,11 @@ function updateApp(updateId=true) {
  * quantities set in the hidden ingredients which represent the original serving size and the
  * shown ingredients which represent the user adjusted serving size.
  */
-function updateIngrQuantity() {
+function updateIngrQuantity(): void {
     const $ingredientsHidden = $('#detailIngredients li.ingr-hidden:has(span.meal-view-quantity)');
     const $ingredientsShown = $('#detailIngredients li.ingr-shown:has(span.meal-view-quantity)');
     const ogServingSize = parseInt($('#ogServingSize').text());
-    const newServingSize = parseInt($('#servingInpt').val());
+    const newServingSize = parseInt($('#servingInpt').val() as string);
     // this is used to calculate the new quantities
     const percentChange = newServingSize / ogServingSize;
     
@@ -471,7 +410,7 @@ function updateIngrQuantity() {
         const $quantityHidden = $ingr.find('.meal-view-quantity');
         // calculate the new quantity
         const quantityVal = parseFloat($quantityHidden.text());
-        var newQuantity = Math.round(quantityVal * percentChange * 10) / 10;
+        let newQuantity = Math.round(quantityVal * percentChange * 10) / 10;
         // get the visible quantity value
         const $quantityShown = $ingredientsShown.find('.meal-view-quantity').eq(index);
         // makes the quantity a whole number if the decimal value on the float is 0 or it's larger than 50
@@ -485,21 +424,23 @@ function updateIngrQuantity() {
 
 /**
  * Populates the options for the meal selects
- * @param {array} meals - array of the meals 
+ * @param {Array} meals - array of the meals 
  */
-function updateMealList(meals) {
-    var options = '';
+function updateMealList(meals: MealRecord[]): void {
+    let options = '';
     // arrange the meals alphabetically
     meals = meals.sort((a, b) => {
         const id1 = Object.keys(a)[0];
         const id2 = Object.keys(b)[0];
 
-        return a[id1]['name'].localeCompare(b[id2]['name']);
+        return a[id1 as keyof MealRecord].name.localeCompare(
+            b[id2 as keyof MealRecord].name
+        );
     });
 
     meals.forEach((meal) => {
-        const id = Object.keys(meal)[0];
-        options += `<option value="${id}">${meal[id]['name']}</option>`;
+        const id = Object.keys(meal)[0] as keyof MealRecord;
+        options += `<option value="${id}">${meal[id].name}</option>`;
     });
     // remove all the options and set the updated ones
     $('#editMeals option:enabled').remove();
@@ -507,7 +448,7 @@ function updateMealList(meals) {
     // do the same for the meal plan forms
     $('#createPlanForm .meal-name').each(function() {
         const $mealSelect = $(this);
-        const val = $mealSelect.val();
+        const val = $mealSelect.val()!;
         $mealSelect.find('option:enabled').remove();
         $mealSelect.append(options);
         $mealSelect.val(val).trigger('change');
@@ -519,18 +460,36 @@ function updateMealList(meals) {
  * Gets a value from the meal object.
  * @param {Object} meal - A dictionary of a single meal
  * @param {string} key -A top level key that will be used with the meal to get a value
- * @param {string} [timeKey] - Optional. If `key` is `time` then another key is needed to get the nested value
+ * @param {string} timeKey - Optional. If `key` is `time` then another key is needed to get the nested value
  * @returns {string} - Returns the value requested using the supplied key(s)
  */
-function getVal(meal, key, timeKey) {
-    if (meal && key && timeKey) {
-        if (meal.hasOwnProperty(key) && meal[key].hasOwnProperty(timeKey)) {
-            return meal[key][timeKey];
-        }
+function getVal(meal: Meal, key: keyof Meal): string;
+function getVal<K extends keyof Meal['time']>(
+    meal: Meal, key: 'time', timeKey: K
+): Meal['time'][K];
+function getVal(
+    meal: Meal, key: keyof Meal, timeKey?: string
+): any {
+    if (key === 'time' && timeKey) {
+        return meal.time[timeKey as keyof Meal['time']];
     }
-    else {
-        return meal[key];
-    }
+    return meal[key];
+}
+
+
+function isIngredientRow(
+    ingredient: Ingredient | IngredientDivider,
+    el: JQuery<HTMLElement>
+): ingredient is Ingredient {
+    return el.hasClass("ingr-row");
+}
+
+
+function isIngredientDivRow(
+    ingredient: Ingredient | IngredientDivider,
+    el: JQuery<HTMLElement>
+): ingredient is Ingredient {
+    return el.hasClass("ingr-div");
 }
 
 
@@ -540,15 +499,15 @@ function getVal(meal, key, timeKey) {
  * 2. For each ingredient and divider an appropriate row is created
  * 3. The buttons are changed 
  */
-function editMeal() {
-    const id = $('#editMeals option:selected').val();
+function editMeal(): void {
+    const id = $('#editMeals option:selected').val() as string;
     if (id) {
         getMeals('a_meal', id)
             .then((meals) => {
                 // set the values into the form
-                const meal = meals[id];
+                const meal = meals[id as keyof MealRecord];
                 $('#mealId').val(id);
-                $('#mealName').val(meal['name']);
+                $('#mealName').val(meal.name);
                 $('#region').val(getVal(meal, 'region'));
                 $('#course').val(getVal(meal, 'course'));
                 $('#serving').val(getVal(meal, 'serv'));
@@ -557,16 +516,16 @@ function editMeal() {
                 $('#description').val(getVal(meal, 'desc'));
                 $('#description').trigger('change');
                 // empty the ingredients and build the html for the ingredients
-                var $ingredients = $('#ingredients');
+                let $ingredients = $('#ingredients');
                 $ingredients.empty();
-                var html = '';                
+                let html = '';                
                 
-                const ingrs = meal['ingrs'];
+                const ingrs = meal.ingrs;
                 if (!ingrs.length) {    // if there aren't any ingredients just show an empty row
                     html += ingrRow;
                 }
                 else {
-                    ingrs.forEach( (ingr) => {
+                    ingrs.forEach((ingr) => {
                         if (ingr.hasOwnProperty('name')) {  // ingredient row
                             html += ingrRow;
                         }
@@ -580,14 +539,14 @@ function editMeal() {
                 // set the values for each row
                 if (ingrs.length) {
                     $ingredients.find('div[class*="ingr-"]').each(function(index, row) {
-                        var ingr = ingrs[index];
-                        if ($(row).hasClass('ingr-row')) {  // ingredient row
-                            $(row).find('select[name="ingredient"]').val(ingr['name']).trigger('change');
-                            $(row).find('input[name="quantity"]').val(ingr['quant']);
-                            $(row).find('select[name="unit"]').val(ingr['unit']);
+                        let ingr = ingrs[index]!;
+                        if (isIngredientRow(ingr, $(row))) {  // ingredient row
+                            $(row).find('select[name="ingredient"]').val(ingr.name).trigger('change');
+                            $(row).find('input[name="quantity"]').val(ingr.quant!);
+                            $(row).find('select[name="unit"]').val(ingr.unit!);
                         }
-                        else if ($(row).hasClass('ingr-div')) { // ingredient div
-                            $(row).find('input[name="ingrDiv"]').val(ingr['div']);
+                        else if (isIngredientDivRow(ingr, $(row))) { // ingredient div
+                            $(row).find('input[name="ingrDiv"]').val(ingr.div);
                         }
                     });
                 }
@@ -603,12 +562,12 @@ function editMeal() {
  * Handles the drag and drop sorting functionality with the ingredients
  * using the Sortable.js library
  */
-const el = document.getElementById('ingredients');
-var sortable = Sortable.create(el);
+const el = document.getElementById('ingredients')!;
+let sortable = Sortable.create(el);
 sortable.option('disabled', true);
 
 
-function enableSortMode() {
+function enableSortMode(): void {
     $('#enableSortBtn').hide();
     $('#disableSortBtn').show();
     sortable.option('disabled', false);
@@ -616,7 +575,7 @@ function enableSortMode() {
 }
 
 
-function disableSortMode() {
+function disableSortMode(): void {
     $('#disableSortBtn').hide();
     $('#enableSortBtn').show();
     sortable.option('disabled', true);
@@ -627,10 +586,10 @@ function disableSortMode() {
 /**
  * Resets the create/edit meal form and updates the max meal id for use with the next meal.
  */
-function resetForm() {
-    $('#createMealForm')[0].reset();
+function resetForm(): void {
+    ($('#createMealForm')[0] as HTMLFormElement).reset();
     $('#ingredients').html(ingrRow);
-    $('#editMeals').val($('#editMeals option:first').val()).trigger('change');
+    $('#editMeals').val('').trigger('change');
     $('#description').trigger('change');
     $('#saveMealBtn').show();
     $('#resetFormBtn').prop('disabled', true);
@@ -645,26 +604,21 @@ function resetForm() {
 
 /* Create Meal Plan Section ------------------- */
 
-// handle inputs
-
-
-
 // set the min date to today
-var today = new Date;
-today = today.toISOString().split('T', 10)[0];
+const today = (new Date).toISOString().split('T', 10)[0]!;
 $('#createPlanForm input[type="date"]').attr('min', today);
 
 
-function planToJson() {
+function planToJson(): Plan[] {
     const $formData = $('#createPlanForm');
-    const $mealRows = $formData.find('.plan-row');
-    const plan = [];
+    const $planRows = $formData.find('.plan-row');
+    const plan = [] as Plan[];
 
-    $mealRows.each(function() {
-        const $this = $(this);
-        var mealId = $this.find('.meal-name').val();
-        var mealName = $this.find('.meal-name').find(':selected').text();
-        var mealType = $this.find('.meal-type').val();
+    $planRows.each(function() {
+        const $row = $(this);
+        let mealId = $row.find('.meal-name').val() as string;
+        let mealName = $row.find('.meal-name').find(':selected').text();
+        let mealType = $row.find('.meal-type').val() as string;
         if (!mealId) {
             mealId = '';
             mealName = '';
@@ -672,13 +626,13 @@ function planToJson() {
         if (!mealType) {
             mealType = '';
         }
-        const dictPlan = {
-            'date': $this.find('.meal-date').val(),
-            'meal_id': mealId,
-            'meal_name': mealName,
-            'meal_type': mealType,
-            'serv': $this.find('.meal-serving').val(),
-            'note': $this.find('.meal-note').val()
+        const dictPlan: Plan = {
+            date: $row.find('.meal-date').val() as string,
+            meal_id: mealId,
+            meal_name: mealName,
+            meal_type: mealType,
+            serv: $row.find('.meal-serving').val() as string,
+            note: $row.find('.meal-note').val() as string
         };
         plan.push(dictPlan);
     });
@@ -687,13 +641,13 @@ function planToJson() {
 }
 
 
-function addNewMealRow() {
+function addNewMealRow(): void {
     $('.plan-list').append('<hr>' + mealRow);
     scrollToNewPlan();
 }
 
 
-function savePlan() {
+function savePlan(): void {
     const plan = planToJson();
     postPlan(plan);
     updatePlanList(plan);
@@ -701,53 +655,45 @@ function savePlan() {
 }
 
 
-function postPlan(plan) {
+function postPlan(plan: Plan[]): void {
     const request = $.ajax({
         type: "POST",
         url: "/api/submit.php",
-        datatype: 'json',
         data: {
-            'payload': JSON.stringify(plan),
-            'mode': 'plan'
+            payload: JSON.stringify(plan),
+            mode: 'plan'
         }
     });
-    request.done(() => {
-        var $saveBtn = $('#savePlanBtn');
+    request.done(_ => {
+        let $saveBtn = $('#savePlanBtn');
         $saveBtn.text('Saved!');
         setTimeout(() => {
             $saveBtn.text('Save Plan');
         }, 2000);
     });
-    request.fail(() => {
-        console.log('failed to post plan!');
-    });
+    request.fail(_ => console.error('Failed to save plan!'));
 }
 
 
-function getPlan() {
+function getPlan(): Promise<Plan[]> {
     return new Promise((resolve, reject) => {
         const request = $.ajax({
             type: "GET",
             url: "/api/submit.php",
-            datatype: 'json',
-            data: {'type': 'plan'},
+            data: {type: 'plan'}
         });
-        request.done((plan) => {
-            resolve(JSON.parse(plan));
-        });
-        request.fail(() => {
-            console.log('get request failed!');
-        });
+        request.done((plan) => resolve(JSON.parse(plan)));
+        request.fail(_ => console.error('Failed to get plan!'));
     });
 }
 
 
-function showPlanForm(plan) {
+function showPlanForm(plan: Plan[]): void {
         // iterate through length of plan and create rows for each one
     if (plan.length) {
-        var $planDiv = $('.plan-list');
+        let $planDiv = $('.plan-list');
         $planDiv.empty();
-        var hr = '';
+        let hr: string;
         plan.forEach((plan, index) => {
             if (index !== 0) {
                 hr = '<hr>';
@@ -765,37 +711,38 @@ function showPlanForm(plan) {
 }
 
 
-function deletePlan(btn) {
-    const $planRow = $(btn).closest('.plan-row');
+function deletePlan(this: HTMLElement): void {
+    const $planRow = $(this).closest('.plan-row');
     $planRow.prev().remove();
     $planRow.remove();
 }
 
 /* My Meal Plan Section ----------------------- */
 
-function updatePlanList(plan) {
+function updatePlanList(plan: Plan[]): void {
     const $plan = $('#mealPlannerList');
     $plan.empty();
-    var html = '';
+    let html = '';
     
     if (plan.length) {
-        plan.sort((a, b) => {
-            const rating = {
-                'breakfast': 1,
-                'brunch': 2,
-                'lunch': 3,
-                'linner': 4,
-                'dinner': 5,
-            }
-            return rating[a['meal_type']] - rating[b['meal_type']];         
-        });
-        const dates = [...new Set(plan.map(meal => meal['date']))];
-        dates.sort((a, b) => new Date(a) - new Date(b));
+        const rating = {
+            breakfast: 1,
+            brunch: 2,
+            lunch: 3,
+            linner: 4,
+            dinner: 5
+        } as const;
+        plan.sort((a, b) => 
+            rating[a.meal_type as keyof typeof rating] -
+            rating[b.meal_type as keyof typeof rating]
+        );
+        const dates = [...new Set(plan.map(meal => meal.date))];
+        dates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
         dates.forEach((date) => {
             const dailyPlan = plan.filter(meal => meal['date'] === date);
-            var cards = '';
+            let cards = '';
             dailyPlan.forEach((meal) => {
-                var id = '',
+                let id = '',
                 cardClass = '',
                 title = '',
                 mealType = '',
@@ -843,9 +790,10 @@ function updatePlanList(plan) {
         });
     }
     else {
-        html = `<p>You haven't created a meal plan yet. You can can create one <span role="button" onclick="jumpToEditPlanner()"><strong>here.</strong></span></p>`
+        html = `<p>You haven't created a meal plan yet. You can can create one <span role="button"><strong>here.</strong></span></p>`
     }
     $plan.html(html);
+    $plan.find('span[role="button"]').on('click', jumpToEditPlanner);
     jumpToMeal();
 }
 
@@ -854,7 +802,7 @@ function updatePlanList(plan) {
  * @param {string} dateString - Date as a string
  * @returns {string} - Date string in (Monday, 12 March 2023) format
  */
-function formatDate(dateString) {
+function formatDate(dateString: string): string {
     const date = new Date(dateString);
     const formattedDate = Intl.DateTimeFormat(
         'en-GB',
@@ -864,15 +812,15 @@ function formatDate(dateString) {
 }
 
 
-function jumpToMeal() {
+function jumpToMeal(): void {
     $('.card[id]').each(function() {
         const $card = $(this);
-        const cardId = $card.attr('id');
+        const cardId = $card.attr('id')!;
         const id = `#dt-${cardId.split('-').slice(-1)}`;
         const mealName = $card.find('.card-title').text();
         $card.on('click', () => {
             table.search( mealName ).draw();
-            $(id).click();
+            $(id).trigger('click');
             jumpToMealViewer();
             
         }); 
@@ -880,99 +828,118 @@ function jumpToMeal() {
 }
 
 
-function createShoppingList(plan) {
+function isIngredient(ingr: Ingredient | IngredientDivider): ingr is Ingredient {
+    return 'name' in ingr;
+}
+
+
+type IngredientQuantity = {
+    unit: string;
+    quant: string;
+};
+
+
+type ShoppingListItem = {
+    name: string;
+    quantities: IngredientQuantity[];
+    mealsWExtraIngr: string[];
+};
+
+
+function createShoppingList(plan: Plan[]): void {
     // get all the meals in the plan
-    const savedMeals = plan.filter(meal => meal['meal_id']);
-    const savedMealsIds = savedMeals.map(meal => meal['meal_id']);
+    const savedMeals = plan.filter(meal => meal.meal_id);
+    const savedMealsIds = savedMeals.map(meal => meal.meal_id);
     const filtMeals = globalMeals.filter((meal) => {
-        const id = Object.keys(meal)[0];
+        const id = Object.keys(meal)[0]!;
         return savedMealsIds.includes(id);
     });
     // split them into meals with and without ingredients
-    var mealsWithIngrs = [];
-    var mealsWoIngrs = [];
+    let mealsWithIngrs = [] as MealRecord[];
+    let mealsWoIngrs = [] as MealRecord[];
     filtMeals.forEach((meal) => {
-        const id = Object.keys(meal)[0];
-        if (meal[id]['ingrs'].length) {
-            mealsWithIngrs.push(meal);
-        }
-        else {
-            mealsWoIngrs.push(meal);
-        }
+        const id = Object.keys(meal)[0] as keyof MealRecord;
+        
+        if (meal[id].ingrs.length) mealsWithIngrs.push(meal);
+        else mealsWoIngrs.push(meal);
     });
     
-    var ingrs = [];
+    let ingrs: ShoppingListItem[] = [];
     mealsWithIngrs.forEach((meal) => {
-        const id = Object.keys(meal)[0];
+        const id = Object.keys(meal)[0] as keyof MealRecord;
         // get all the ingredients for that meal, ignore the ingredient dividers
-        const ingrsList = meal[id]['ingrs'].filter(ingr => ingr['name']);
-        // multiplier is used to calculate the right ingredient quuantities
-        var planServSize = plan.find(meal => meal['meal_id'] === id)['serv'];
-        var mealServSize = meal[id]['serv'];
-        var multiplier = planServSize / mealServSize;
+        const ingrsList = meal[id as keyof MealRecord].ingrs.filter(isIngredient);
+        // multiplier is used to calculate the right ingredient quantities
+        const planServSize = (plan.find(meal => meal.meal_id === id))!.serv;
+        const mealServSize = meal[id].serv;
+        let multiplier = parseInt(planServSize) / parseInt(mealServSize);
         if (!(planServSize && mealServSize)) {
-            var multiplier = 1;
+            multiplier = 1;
         }
         // for each ingredient build an array that adds all the quantities for that ingredient together
         ingrsList.forEach((ingr) => {
-            var name = LowerRmWSpace(ingr['name']);
-            var ingrNames = ingrs.map(ingr => LowerRmWSpace(ingr['name']));
-            var quant = ingr['quant'] || null;
-            var unit = ingr['unit'] || null;
-            
+            const name = LowerRmWSpace(ingr.name);
+            const ingrNames = ingrs.map(ingr => LowerRmWSpace(ingr.name));
+            let quant = ingr.quant || null;
+            let unit = ingr.unit || null;
             if (quant) {
-                quant = Math.round(quant * multiplier * 10) / 10;
-                if (quant % 1 == 0 || quant > 50) {
-                    quant = Math.round(quant);
+                let num = parseInt(quant);
+                num = Math.round(num * multiplier * 10) / 10;
+                if (num % 1 == 0 || num > 50) {
+                    num = Math.round(num);
                 }
+                quant = num.toString();
             }
             // add the ingredient if it isn't already in the array
             if (!(ingrNames.includes(name))) {
-                const ingrObj = {
-                    'name': ingr['name'],
-                    'quantities': [
+                const ingrObj: ShoppingListItem = {
+                    name: ingr.name,
+                    quantities: [
                         {
-                            'unit': unit,
-                            'quant': quant
+                            unit: unit as string,
+                            quant: quant as string
                         }
                     ],
-                    'mealsWExtraIngr': []
+                    mealsWExtraIngr: []
                 };
                 if (!quant) {
-                    ingrObj['mealsWExtraIngr'].push(meal[id]['name']);
+                    ingrObj.mealsWExtraIngr.push(meal[id].name);
                 }
                 ingrs.push(ingrObj);
             }
             else {
                 // get the ingredient that already exists
-                const ingrMatch = ingrs.find(ingrdict => ingrdict['name'] === ingr['name']);
-                const unitMatch = ingrMatch['quantities'].find(quant => quant['unit'] === ingr['unit']);
-                const hasInvalidQuant = ingrMatch['quantities'].find(quant => quant['unit'] === null);
+                const ingrMatch = ingrs.find(ingrdict => ingrdict.name === ingr.name)!;
+                const unitMatch = ingrMatch.quantities.find(quant => quant.unit === ingr.unit);
+                const hasInvalidQuant = ingrMatch.quantities.find(quant => quant.unit === null);
                 if (!hasInvalidQuant) {
-                    if (ingr['quant']) {
+                    if (ingr.quant) {
                         if (unitMatch) {
-                            unitMatch['quant'] = parseInt(unitMatch['quant']) + parseInt(ingr['quant']);
+                            unitMatch.quant = (
+                                parseInt(unitMatch.quant) + 
+                                parseInt(ingr.quant)
+                            ).toString();
                         }
                         else {
-                            const newQuantType = {
-                                'unit': unit,
-                                'quant': quant,
+                            const newQuantType: IngredientQuantity = {
+                                unit: unit as string,
+                                quant: quant as string
                             };
-                            ingrMatch['quantities'].push(newQuantType);
+                            ingrMatch.quantities.push(newQuantType);
                         }
                     }    
                     else {
-                        ingrMatch['mealsWExtraIngr'].push(meal[id]['name']);
+                        ingrMatch.mealsWExtraIngr.push(meal[id].name);
                     }
                 }
                 else {
-                    if (ingr['quant']) {
-                        ingrMatch['quantities'] = [
+                    if (ingr.quant) {
+                        ingrMatch.quantities = [
                             {
-                                'unit': unit,
-                                'quant': quant
+                                unit: unit as string,
+                                quant: quant as string
                             }
-                        ]
+                        ];
                     }
                 }
             }
@@ -980,45 +947,44 @@ function createShoppingList(plan) {
     });
     
     // build the html
-    var html = '<ul>';
+    let html = '<ul>';
     ingrs.forEach((ingr) => {
-        var list = '<span><strong>';
-        var info = '';
-        if (ingr['mealsWExtraIngr'].length) {
-            var popoverMeals = ingr['mealsWExtraIngr'].join('');
-            var popoverText = `${popoverMeals} has ${ingr['name']} with no quantity so you'll need more than what is listed here!`;
-            if (ingr['mealsWExtraIngr'].length === 2) {
-                popoverMeals = ingr['mealsWExtraIngr'].join(' and ');
+        let list = '<span><strong>';
+        let info = '';
+        if (ingr.mealsWExtraIngr.length) {
+            let popoverMeals = ingr.mealsWExtraIngr.join('');
+            let popoverText = `${popoverMeals} has ${ingr.name} with no quantity so you'll need more than what is listed here!`;
+            if (ingr.mealsWExtraIngr.length === 2) {
+                popoverMeals = ingr.mealsWExtraIngr.join(' and ');
             }
-            else if (ingr['mealsWExtraIngr'].length > 2){
-                popoverMeals = ingr['mealsWExtraIngr'].slice(0, -1).join(', ') + ' and ' + ingr['mealsWExtraIngr'].slice(-1);
-
+            else if (ingr.mealsWExtraIngr.length > 2){
+                popoverMeals = ingr.mealsWExtraIngr.slice(0, -1).join(', ') + ' and ' + ingr.mealsWExtraIngr.slice(-1);
             }
-            if (ingr['mealsWExtraIngr'].length > 1) {
-                popoverText = `${popoverMeals} have ${ingr['name']} with no quantity so you'll need to take that into account!`;
+            if (ingr.mealsWExtraIngr.length > 1) {
+                popoverText = `${popoverMeals} have ${ingr.name} with no quantity so you'll need to take that into account!`;
             }
             info = `
                 <i tabindex="0" class="bi bi-info-circle" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="top" data-bs-content="${popoverText}"></i>
             `;
         }
         // loop through the quantities and 
-        ingr['quantities'].forEach((quant, index) => {
-            if (quant['quant']) {
-                list += `${quant['quant']} (${quant['unit']})`;
-                if (index !== ingr['quantities'].length - 1) {
+        ingr.quantities.forEach((quant, index) => {
+            if (quant.quant) {
+                list += `${quant.quant} (${quant.unit})`;
+                if (index !== ingr.quantities.length - 1) {
                     list += ' + ';
                 }
             }
         });
         list += '</strong></span>';
-        html += `<li>${ingr['name']} ${list} ${info}</li>`;
+        html += `<li>${ingr.name} ${list} ${info}</li>`;
     });
 
     html += '</ul>';
     
     $('#shoppingList').empty().html(html);
     if (mealsWoIngrs.length) {
-        var warning = `
+        let warning = `
             <p>
                 <i class="bi bi-exclamation-triangle"></i>
                 The following meals in your plan don't have ingredients assicated with them. Add ingredients to them if you want them in your shopping list.
@@ -1026,7 +992,7 @@ function createShoppingList(plan) {
             <ul>
         `;
         mealsWoIngrs.forEach((meal) => {
-            const id = Object.keys(meal)[0];
+            const id = Object.keys(meal)[0] as keyof MealRecord;
             warning += `<li>${meal[id]['name']}</li>`;
         });
         warning += '</ul>';
@@ -1040,7 +1006,7 @@ function createShoppingList(plan) {
 }
 
 
-function LowerRmWSpace(string) {
+function LowerRmWSpace(string: string): string {
     return string.toLowerCase().replace(/\s/g, "");
 }
 
@@ -1053,13 +1019,9 @@ function LowerRmWSpace(string) {
  * @param {string} val - a string that is either empty or it isn't 
  * @returns {string} emoji - an icon based on if the val was true or false
  */
-function prettyBool(val) {
-    if (val) {
-        return '✔️';
-    }
-    else {
-        return '❌';
-    }
+function prettyBool(val: string | number): string {
+    if (val) return '✔️';
+    return '❌';
 }
 
 
@@ -1067,15 +1029,16 @@ function prettyBool(val) {
 var table = $('#mealsTable').DataTable({
     columnDefs: [
         { className: 'text-center', targets: [4, 5, 9]},
-        { target: 0, visible: false },
-        { target: 2, visible: false },
-        { target: 3, visible: false },
-        { target: 6, visible: false },
-        { target: 7, visible: false },
-        { target: 8, visible: false },
+        { targets: 0, visible: false },
+        { targets: 2, visible: false },
+        { targets: 3, visible: false },
+        { targets: 6, visible: false },
+        { targets: 7, visible: false },
+        { targets: 8, visible: false },
     ],
     createdRow: function(row, data, index) {    // attach ids to each row using the meal id
-        var id = `dt-${data[0]}`
+        const tableRow = data as (string | number)[];
+        const id = `dt-${tableRow[0]}`;
         $(row).attr('id', id);
     },
     language: { 
@@ -1090,51 +1053,47 @@ var table = $('#mealsTable').DataTable({
 /**
  * Redraws the datatable using the latest array of meals. Hidden columns are included in the
  * table which are then used to show a meal's details when a row is clicked on.
- * @param {array} meals - Array of all the meals 
+ * @param {Array} meals - Array of all the meals 
  */
-function updateTable(meals) {
+function updateTable(meals: MealRecord[]): void {
     table
         .clear()
         .draw();
       
-    var mealRows = [];
+    let mealRows: string[][] = [];
     
     meals.forEach((meal) => {
-        const id = Object.keys(meal)[0];
-        var ingredients = '';
+        const id = Object.keys(meal)[0] as keyof MealRecord;
+        let ingredients = '';
         // build the ingredients
-        var ingrs = meal[id]['ingrs'];
-        var ingrCount = ingrs.length;
+        let ingrs = meal[id].ingrs;
+        let ingrCount = ingrs.length;
         
         if (ingrCount) {
             // builds the html for the ingredients and dividers
             ingrs.forEach((ingr, index) => {
-                var isIngr = ingr.hasOwnProperty('name');
-                if (index === 0) {
-                    if (isIngr) {
+                let isIngr = isIngredient(ingr);
+                if (index === 0 && isIngr) ingredients += '<ul>';
+                else if (index > 0) {
+                    if (ingrs[index - 1]!.hasOwnProperty('div') && isIngr) {    // if the previous ingr was a div and this is a ingr
                         ingredients += '<ul>';
                     }
-                }
-                if (index !== 0) {
-                    if (ingrs[index-1].hasOwnProperty('div') && isIngr) {    // if the previous ingr was a div and this is a ingr
-                        ingredients += '<ul>';
-                    }
-                    else if (ingrs[index-1].hasOwnProperty('name') && !isIngr) { // if the previous ingr was a ingr and this is a div
+                    else if (ingrs[index - 1]!.hasOwnProperty('name') && !isIngr) { // if the previous ingr was a ingr and this is a div
                         ingredients += '</ul>';
                     }
-                }                    
-                if (isIngr) {
-                    var quantity = '';
-                    if (ingr['quant']) {
-                        var quantity = `<strong><span class="meal-view-quantity">${ingr['quant']}</strong> (${ingr['unit']})</span>`;
+                }
+                if (isIngredient(ingr)) {
+                    let quantity = '';
+                    if (ingr.quant) {
+                        quantity = `<strong><span class="meal-view-quantity">${ingr.quant}</strong> (${ingr.unit})</span>`;
                     }
                     ingredients += `
-                        <li class="ingr-shown">${ingr['name']} <strong>${quantity}</strong></li>
-                        <li class="ingr-hidden" hidden>${ingr['name']} <strong>${quantity}</strong></li>
+                        <li class="ingr-shown">${ingr.name} <strong>${quantity}</strong></li>
+                        <li class="ingr-hidden" hidden>${ingr.name} <strong>${quantity}</strong></li>
                     `;
                 }
                 else {
-                    ingredients += `<p class="ingr-div"><strong>${ingr['div']}</strong></p>`;
+                    ingredients += `<p class="ingr-div"><strong>${ingr.div}</strong></p>`;
                 }
             });
         }
@@ -1142,31 +1101,26 @@ function updateTable(meals) {
             ingredients += "<p>This meal doesn't have any ingredients so go add some MUPPET<p>";
         }
         // build the description
-        if (meal[id]['desc']) {
-            var desc = meal[id]['desc']
-        }
-        else {
-            var desc = "This meal doesn't have a description so go add one MUPPET";
-        }
+        let desc = "This meal doesn't have a description so go add one MUPPET";
+        if (meal[id].desc) desc = meal[id]['desc'];
+
         const description = `<h5>Instructions</h5><p>${desc}</p>`;
         // build the meal time
-        if (meal[id]['time']['len']) {
-            var time = `${meal[id]['time']['len']} ${meal[id]['time']['unit']}`;
-        }
-        else {
-            var time = '-';
+        let time = '-';
+        if (meal[id].time.len) {
+            time = `${meal[id].time.len} ${meal[id].time.unit}`;
         }
         // The contents for each row in the table
         const mealRow = [
             id,
-            meal[id]['name'],
-            meal[id]['region'],
-            meal[id]['course'],
-            prettyBool(meal[id]['desc']),
-            prettyBool(meal[id]['ingrs'].length),
+            meal[id].name,
+            meal[id].region,
+            meal[id].course,
+            prettyBool(meal[id].desc),
+            prettyBool(meal[id].ingrs.length),
             ingredients,
             description,
-            meal[id]['serv'],
+            meal[id].serv,
             time
         ]
         mealRows.push(mealRow);
@@ -1176,16 +1130,16 @@ function updateTable(meals) {
     
     // when a row in the table is clicked show the meal details
     $('#mealsTable').on('click', 'tbody tr', function() {
-        const data = table.row(this).data();
-        id = data[0]; // used in the jumptToEdit function
+        const data = table.row(this).data() as any[];
+        editId = data[0]; // used in the jumpToEditMeal function
         const name = data[1];
         const serving = data[8];
         const ingredients = data[6];
         const description = data[7];
-        const time = data[9]
+        const time = data[9];
         const hasQuantities = $(ingredients).find('.meal-view-quantity').length;
-        var servingHtml = `<p class="font-small mb-0">Original Serving Size (<span id="ogServingSize">${serving}</span>)</p>`;
-        var servingInpt = '';
+        let servingHtml = `<p class="font-small mb-0">Original Serving Size (<span id="ogServingSize">${serving}</span>)</p>`;
+        let servingInpt = '';
         if (!serving) {
             servingHtml = '<p class="font-small">There is no serving size saved for this meal.</p>';
         }
@@ -1193,14 +1147,14 @@ function updateTable(meals) {
         if (serving && hasQuantities) {
             servingInpt = `
             <label for="servingInpt" class="form-label">Change Serving Size</label>
-            <input id="servingInpt" type="number" class="form-control" min="1" value="${serving}" placeholder="Serving" onchange="updateIngrQuantity()"></input>
+            <input id="servingInpt" type="number" class="form-control" min="1" value="${serving}" placeholder="Serving"></input>
             `;
         }
         
         const header = `<h3>${name}</h3>${servingHtml}` + servingInpt;
         const btns = `
-            <button id="copyBtn" type="button" class="btn-main me-3" onclick="mealToClipboard()"><i class="bi bi-copy"></i></button>
-            <button type="button" class="btn-second" onclick="jumpToEditMeal()"><i class="bi bi-pencil-fill"></i></button>
+            <button type="button" id="copyBtn" class="btn-main me-3"><i class="bi bi-copy"></i></button>
+            <button type="button" id="jumpToEditBtn" class="btn-second"><i class="bi bi-pencil-fill"></i></button>
         `;
         const mealSubHeader = `
             <div class="col">
@@ -1213,6 +1167,9 @@ function updateTable(meals) {
         $('#mealSubHeader').html(mealSubHeader);
         $('#detailIngredients').html(ingredients);
         $('#detailDescription').html(description);
+        $('#copyBtn').on('click', mealToClipboard);
+        $('#jumpToEditBtn').on('click', jumpToEditMeal);
+        $('#servingInpt').on('change', updateIngrQuantity);
         scrollToMeal();
     });
 }
@@ -1222,9 +1179,9 @@ function updateTable(meals) {
  * Copies a meals details to the clip board. The method used is dependant
  * on how the application has been hosted ie. if the domain has an SSL certificate.
  */
-function mealToClipboard() {    
+function mealToClipboard(): void {    
     // build the text to copy to the clipboard
-    var textToCopy = '';
+    let textToCopy = '';
     const name = $('#detailHeading h3').text();
     const serving = $('#servingInpt').val();
     textToCopy += `${name}\n\nServing Size: ${serving}`;
@@ -1251,7 +1208,7 @@ function mealToClipboard() {
         const clipboardInput = $('<textarea>');
         $('#detailDescription').after(clipboardInput);
         
-        clipboardInput.val(textToCopy).select();
+        clipboardInput.val(textToCopy).trigger('select');
         document.execCommand("copy");
         clipboardInput.remove();
     }
@@ -1259,10 +1216,10 @@ function mealToClipboard() {
     else {
         const clipboardText = async () => {
             try {
-                await navigator.clipboard.writeText(newClip);
+                await navigator.clipboard.writeText(textToCopy);
             }
             catch(err) {
-                alert('Failed to copy to clipboard. This browser may not support the API being used.\n\n', err)
+                alert(`Failed to copy to clipboard. This browser may not support the API being used.\n\n${err}`)
             }
         }
     }
@@ -1277,21 +1234,23 @@ function mealToClipboard() {
     }, 1500);
 }
 
-function scrollToMeal() {
-    $('html, body').scrollTop($('#detailHeading').offset().top - 17);
+// utility functions
+
+function scrollToMeal(): void {
+    $('html, body').scrollTop($('#detailHeading').offset()!.top - 17);
 }
 
 
-function scrollToEditMeal() {
-    $('html, body').scrollTop($('#editMeals').offset().top - 17);
+function scrollToEditMeal(): void {
+    $('html, body').scrollTop($('#editMeals').offset()!.top - 17);
+}
+: void
+function scrollToNewPlan(): void {
+    $('html, body').scrollTop($('.plan-row').last().offset()!.top - 17);
 }
 
-function scrollToNewPlan() {
-    $('html, body').scrollTop($('.plan-row').last().offset().top - 17);
-}
-
-function scrollToNewIngr() {
-    $('html, body').scrollTop($('div[class*="ingr-"]').last().offset().top - 17);
+function scrollToNewIngr(): void {
+    $('html, body').scrollTop($('div[class*="ingr-"]').last().offset()!.top - 17);
 }
 
 
@@ -1310,11 +1269,11 @@ triggerTabList.forEach(triggerEl => {
 /**
  * Jumps to the create/edit meal tab and shows you the meal you want to edit
  */
-function jumpToEditMeal() {
+function jumpToEditMeal(): void {
     const triggerEl = document.querySelector('#navbar a[href="#createMealTab"]');
-    bootstrap.Tab.getInstance(triggerEl).show();
+    bootstrap.Tab.getInstance(triggerEl!)?.show();
 
-    $('#editMeals').val(id);
+    $('#editMeals').val(editId);
     $('#editMeals').trigger('change');
     scrollToEditMeal();
 }
@@ -1323,16 +1282,119 @@ function jumpToEditMeal() {
 /**
  * Jumps to meal viewer tab
  */
-function jumpToMealViewer() {
+function jumpToMealViewer(): void {
     const triggerEl = document.querySelector('#navbar a[href="#mealViewerTab"]');
-    bootstrap.Tab.getInstance(triggerEl).show();
+    bootstrap.Tab.getInstance(triggerEl!)?.show();
     scrollToMeal();
 }
 
 /**
  * Jumps to plan editor tab
  */
-function jumpToEditPlanner() {
+function jumpToEditPlanner(): void {
     const triggerEl = document.querySelector('#navbar a[href="#createMealPlanTab"]');
-    bootstrap.Tab.getInstance(triggerEl).show();
+    bootstrap.Tab.getInstance(triggerEl!)?.show();
 }
+
+
+// app setup
+
+var latestId = 1;
+var editId: number;
+var globalMeals: MealRecord[];
+var mealRow: string;
+var ingrRow: string;
+
+$('textarea').on('input change', function() {
+    this.style.height = 'auto';
+    this.style.height = (this.scrollHeight) + 'px';
+});
+
+observerSelect2();
+addNewIngr();
+
+setTimeout(() => {
+    ingrRow = $('#ingredients').clone().html(); // used to create new ingredients
+}, 500);
+
+updateApp({ updateId: true });
+
+setTimeout(() => {
+    mealRow = $('.plan-list').clone().html(); // used to create new meals for the plan
+}, 500);
+
+setTimeout(() => {
+    getPlan().then((plan) => {
+        showPlanForm(plan);
+        updatePlanList(plan);
+        createShoppingList(plan);
+    });
+}, 500)
+
+// event handlers
+
+$('#editMeals').select2({ width: '100%' });
+$('#addNewIngrBtn').on('click', addNewIngr);
+$('#addIngrDivBtn').on('click', addIngrDiv);
+$('#enableSortBtn').on('click', enableSortMode);
+$('#disableSortBtn').on('click', disableSortMode);
+$('#saveMealBtn').on('click', saveMeal);
+$('#updateMealBtn').on('click', updateMeal);
+$('#deleteMealBtn').on('click', deleteMeal);
+$('#resetFormBtn').on('click', resetForm);
+$('#newMealRowBtn').on('click', addNewMealRow);
+$('#savePlanBtn').on('click', savePlan);
+$('#deletePlanBtn').on('click', deletePlan);
+$('#editMeals').on('change', editMeal);
+
+
+// handles disabling of the inputs in the create a meal section
+let $otherInputs = $('#createMealForm :input:not(#editMeals, #mealName, #dltIngrBtn)');
+
+$('#editMeals').on('change', () => {
+    if ($('#editMeals').val()) {
+        $otherInputs.prop('disabled', false);
+    }
+    else {
+        $otherInputs.prop('disabled', true);
+    }
+});
+
+// the same meal name can't be used twice
+$('#mealName').on('keyup', () => {
+    const mealName = $('#mealName').val() as string;
+    
+    if (mealName) {
+        getMeals('all_meals')
+            .then((meals) => {
+                const mealToEditId = $('#editMeals').val() as number;
+                const index = meals.findIndex((meal) => meal.hasOwnProperty(mealToEditId));
+                // this allows you to update the name of an existing meal
+                if (mealToEditId > 0) {
+                    meals.splice(index, 1);
+                }
+                // check to see if the meal name matches an existing meal
+                let duplicateMeal = false;
+                meals.forEach((meal) => {
+                    Object.values(meal).forEach(mealDict => {
+                        if (mealName.toLowerCase() === mealDict.name.toLowerCase()) {
+                            duplicateMeal = true;
+                            return;
+                        }
+                    });
+                });
+
+                if (!duplicateMeal) {
+                    $otherInputs.prop('disabled', false);
+                    $('#duplicateMealName').hide();
+                }
+                else {
+                    $otherInputs.prop('disabled', true);
+                    $('#duplicateMealName').show();
+                }
+            });
+    }
+    else {
+        $otherInputs.prop('disabled', true);
+    }
+});
