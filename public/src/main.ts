@@ -616,6 +616,9 @@ function planToJson(): Plan[] {
 
     $planRows.each(function() {
         const $row = $(this);
+        let date = $row.find('.meal-date').val();
+        if (!date) return false; // must have a date to save into the plan
+
         let mealId = $row.find('.meal-name').val() as string;
         let mealName = $row.find('.meal-name').find(':selected').text();
         let mealType = $row.find('.meal-type').val() as string;
@@ -643,6 +646,7 @@ function planToJson(): Plan[] {
 
 function addNewMealRow(): void {
     $('.plan-list').append('<hr>' + mealRow);
+    $('.dlt-plan').on('click', deletePlan);
     scrollToNewPlan();
 }
 
@@ -689,7 +693,7 @@ function getPlan(): Promise<Plan[]> {
 
 
 function showPlanForm(plan: Plan[]): void {
-        // iterate through length of plan and create rows for each one
+    // iterate through length of plan and create rows for each one
     if (plan.length) {
         let $planDiv = $('.plan-list');
         $planDiv.empty();
@@ -707,6 +711,7 @@ function showPlanForm(plan: Plan[]): void {
             $newRow.find('textarea').val(plan['note']);
         });
         $('.meal-name').select2({ width: '100%' });
+        $('.dlt-plan').on('click', deletePlan);
     }
 }
 
@@ -1244,7 +1249,7 @@ function scrollToMeal(): void {
 function scrollToEditMeal(): void {
     $('html, body').scrollTop($('#editMeals').offset()!.top - 17);
 }
-: void
+
 function scrollToNewPlan(): void {
     $('html, body').scrollTop($('.plan-row').last().offset()!.top - 17);
 }
@@ -1344,7 +1349,7 @@ $('#deleteMealBtn').on('click', deleteMeal);
 $('#resetFormBtn').on('click', resetForm);
 $('#newMealRowBtn').on('click', addNewMealRow);
 $('#savePlanBtn').on('click', savePlan);
-$('#deletePlanBtn').on('click', deletePlan);
+$('.dlt-plan').on('click', deletePlan);
 $('#editMeals').on('change', editMeal);
 
 
