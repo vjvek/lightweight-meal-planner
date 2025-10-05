@@ -37,7 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $meal = $data;
         if ($mode === 'create') {
             $meal = makeIdUnique($currentMealsArray, $meal);
-            $currentMealsArray[] = $meal; // combine the new meal with the existing ones
+            // check the meal id is valid otherwise don't save it
+            $id = array_key_first($meal);
+            if (is_numeric($id)) {
+                $currentMealsArray[] = $meal; // combine the new meal with the existing ones
+            }
         }
         else {
             $mealId = array_key_first($meal);   // get the id of the POST meal
