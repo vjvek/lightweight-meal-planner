@@ -255,7 +255,7 @@ function mealToDict() {
         }
     });
     let id = $('#mealId').val();
-    return { id: dictMeal };
+    return { [id]: dictMeal };
 }
 // saves a meal
 function saveMeal() {

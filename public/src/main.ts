@@ -323,8 +323,8 @@ function mealToDict(): MealRecord {
             }
         }     
     });
-    let id = $('#mealId').val();
-    return {id: dictMeal};
+    let id = $('#mealId').val() as string;
+    return {[id]: dictMeal} as MealRecord;
 }
 
 
