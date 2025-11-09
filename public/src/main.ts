@@ -553,6 +553,7 @@ function editMeal(): void {
                 $('#saveMealBtn').hide();
                 $('#resetFormBtn').prop('disabled', false);
                 $('#updateMealBtn, #deleteMealBtn').show();
+                $('.dlt-ingr').on('click', deleteIngredient);
             });
     }
 }
@@ -697,18 +698,18 @@ function showPlanForm(plan: Plan[]): void {
     if (plan.length) {
         let $planDiv = $('.plan-list');
         $planDiv.empty();
-        let hr: string;
+        let hr = '';
         plan.forEach((plan, index) => {
             if (index !== 0) {
                 hr = '<hr>';
             }
             $planDiv.append(hr + mealRow);
             const $newRow = $('.plan-row').last();
-            $newRow.find('.meal-date').val(plan['date']);
-            $newRow.find('.meal-name').val(plan['meal_id']).trigger('change');
-            $newRow.find('.meal-type').val(plan['meal_type']);
-            $newRow.find('.meal-serving').val(plan['serv']);
-            $newRow.find('textarea').val(plan['note']);
+            $newRow.find('.meal-date').val(plan.date);
+            $newRow.find('.meal-name').val(plan.meal_id).trigger('change');
+            $newRow.find('.meal-type').val(plan.meal_type);
+            $newRow.find('.meal-serving').val(plan.serv);
+            $newRow.find('textarea').val(plan.note);
         });
         $('.meal-name').select2({ width: '100%' });
         $('.dlt-plan').on('click', deletePlan);
